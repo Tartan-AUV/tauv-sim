@@ -102,15 +102,18 @@ OspreySensors::OspreySensors(std::string prefix,
     auto add_tf = [&](const sf::Transform& T, const std::string& child_suffix) {
         geometry_msgs::msg::TransformStamped t;
         t.header.stamp = now;
-        t.header.frame_id = prefix_ + "/base_link";
+        t.header.frame_id = prefix_ + "/base_link_ned";
         t.child_frame_id = prefix_ + child_suffix;
-        t.transform.translation.x = T.getOrigin().y();
-        t.transform.translation.y = T.getOrigin().x();
-        t.transform.translation.z = -T.getOrigin().z();
+        t.transform.translation.x = T.getOrigin().x();
+        t.transform.translation.y = T.getOrigin().y();
+        t.transform.translation.z = T.getOrigin().z();
         t.transform.rotation.x = T.getRotation().x();
         t.transform.rotation.y = T.getRotation().y();
         t.transform.rotation.z = T.getRotation().z();
         t.transform.rotation.w = T.getRotation().w();
+        std::cout << "TF Rotations: " << child_suffix << " "
+                  << t.transform.rotation.x << " " << t.transform.rotation.y << " "
+                  << t.transform.rotation.z << " " << t.transform.rotation.w << std::endl;
         tfs.push_back(t);
     };
 
@@ -123,6 +126,20 @@ OspreySensors::OspreySensors(std::string prefix,
             add_tf(body_T_cam(i), "/cam" + std::to_string(i) + "_optical");
         }
     }
+
+    // The body is in the NED frame, we add a transform in between to change to ENU for ROS
+    geometry_msgs::msg::TransformStamped enu_t_ned;
+    enu_t_ned.header.stamp = now;
+    enu_t_ned.header.frame_id = prefix_ + "/base_link";      // ENU is Parent
+    enu_t_ned.child_frame_id = prefix_ + "/base_link_ned";  // NED is Child
+    enu_t_ned.transform.translation.x = 0.0;
+    enu_t_ned.transform.translation.y = 0.0;
+    enu_t_ned.transform.translation.z = 0.0;
+    enu_t_ned.transform.rotation.w = 0.0;
+    enu_t_ned.transform.rotation.x = 1/std::sqrt(2);
+    enu_t_ned.transform.rotation.y = 1/std::sqrt(2);
+    enu_t_ned.transform.rotation.z = 0.0;
+    tfs.push_back(enu_t_ned);
 
     tf_broadcaster->sendTransform(tfs);
 }

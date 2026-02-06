@@ -46,10 +46,10 @@
           update_rate: 100.0
         imu:
           update_rate: 200.0
-          angle_std: [0.0, 0.0, 0.0]
-          angular_velocity_std: [0.0, 0.0, 0.0]
+          angle_std: [0.1, 0.1, 0.1]
+          angular_velocity_std: [0.1, 0.1, 0.1]
           yaw_angle_drift: 0.0
-          linear_acceleration_std: [0.0, 0.0, 0.0]
+          linear_acceleration_std: [0.1, 0.1, 0.1]
           angular_velocity_range: [10.0, 10.0, 10.0]
           linear_acceleration_range: [20.0, 20.0, 20.0]
         dvl:

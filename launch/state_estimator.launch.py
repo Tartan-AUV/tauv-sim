@@ -14,14 +14,15 @@ def generate_launch_description():
     sim_param_file = sim_share_dir / "config" / "params.yaml"
     trajectory_file = sim_share_dir / "config" / "trajectories" / "osprey_square.yaml"
 
-    common_share_dir = Path(get_package_share_directory("tauv_common"))
+    common_share_dir = Path(get_package_share_directory("tauv_core"))
     common_ekf_file = common_share_dir / "config" / "ekf.yaml"
 
     # Timestamped bag name
     timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M.%S')
-    bag_name = f"sim_{timestamp}"
+    # bag_name = f"sim_{timestamp}"
+    bag_name = "fix"
     common_ekf_record_file = (
-        Path("src") / "tauv_common" / "odometry_visualization" / "rosbags" / bag_name
+        Path("src") / "tauv_core" / "odometry_visualization" / "rosbags" / bag_name
     )
     print(f"Recording EKF data to: {common_ekf_record_file}")
 
@@ -39,13 +40,13 @@ def generate_launch_description():
                 output="screen",
             ),
             Node(
-                package="tauv_common",
+                package="tauv_core",
                 executable="depth_converter",
                 name="depth_converter",
                 output="screen",
             ),
             Node(
-                package="tauv_common",
+                package="tauv_core",
                 executable="dvl_converter",
                 name="dvl_converter",
                 output="screen",
