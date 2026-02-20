@@ -23,46 +23,44 @@
 #include "tauv_sim/registry.h"
 
 class OspreySensors {
-   public:
-    OspreySensors(std::string prefix,
-                  rclcpp::Node::SharedPtr node,
-                  std::shared_ptr<ConfigLoader> config_loader,
-                  const config::osprey::Frames& frames,
-                  const sf::Transform& body_T_cad,
-                  bool enable_cameras);
+    public:
+        OspreySensors(std::string prefix,
+                    rclcpp::Node::SharedPtr node,
+                    std::shared_ptr<ConfigLoader> config_loader,
+                    const config::osprey::Frames& frames,
+                    const sf::Transform& body_T_cad,
+                    bool enable_cameras);
 
-    // Attach sensors to the Featherstone robot (sensors are registered by the robot).
-    void attach_to_robot(sf::FeatherstoneRobot* robot);
+        // Attach sensors to the Featherstone robot (sensors are registered by the robot).
+        void attach_to_robot(sf::FeatherstoneRobot* robot);
 
-    // Attach sensors to a single-link animated entity and register them with the simulation.
-    void attach_to_animated(sf::AnimatedEntity* entity, sf::SimulationManager* sim_manager);
+        // Attach sensors to a single-link animated entity and register them with the simulation.
+        void attach_to_animated(sf::AnimatedEntity* entity, sf::SimulationManager* sim_manager);
 
-    void on_step(const Context& ctx);
+        void on_step(const Context& ctx);
 
-   private:
-    sf::Transform body_T_depth() const;
-    sf::Transform body_T_imu() const;
-    sf::Transform body_T_dvl() const;
-    sf::Transform body_T_cam(size_t idx) const;
+    private:
+        sf::Transform body_T_depth() const;
+        sf::Transform body_T_imu(size_t idx) const;
+        sf::Transform body_T_dvl() const;
+        sf::Transform body_T_cam(size_t idx) const;
 
-    std::string prefix_;
-    rclcpp::Node::SharedPtr node_;
-    std::shared_ptr<ConfigLoader> config_loader_;
-    config::osprey::Frames frames_;
-    sf::Transform body_T_cad_;
-    bool cameras_enabled_;
+        std::string prefix_;
+        rclcpp::Node::SharedPtr node_;
+        std::shared_ptr<ConfigLoader> config_loader_;
+        config::osprey::Frames frames_;
+        sf::Transform body_T_cad_;
+        bool cameras_enabled_;
 
-    std::unique_ptr<sf::Pressure> pressure_sensor_;
-    std::unique_ptr<sf::IMU> imu_sensor_;
-    std::unique_ptr<sf::DVL> dvl_sensor_;
-    std::array<std::unique_ptr<sf::FisheyeCamera>,
-               config::osprey::sensors::FisheyeCamera::N_CAMERAS>
-        cameras_;
+        std::unique_ptr<sf::Pressure> pressure_sensor_;
+        std::array<std::unique_ptr<sf::IMU>, config::osprey::sensors::Imu::N_IMUS> imu_sensors_;
+        std::unique_ptr<sf::DVL> dvl_sensor_;
+        std::array<std::unique_ptr<sf::FisheyeCamera>, config::osprey::sensors::FisheyeCamera::N_CAMERAS>
+            cameras_;
 
-    std::unique_ptr<PressureSensorBridge> pressure_bridge_;
-    std::unique_ptr<ImuBridge> imu_bridge_;
-    std::unique_ptr<DvlBridge> dvl_bridge_;
-    std::array<std::unique_ptr<FisheyeCameraBridge>,
-               config::osprey::sensors::FisheyeCamera::N_CAMERAS>
-        camera_bridges_;
+        std::unique_ptr<PressureSensorBridge> pressure_bridge_;
+        std::array<std::unique_ptr<ImuBridge>, config::osprey::sensors::Imu::N_IMUS> imu_bridges_;
+        std::unique_ptr<DvlBridge> dvl_bridge_;
+        std::array<std::unique_ptr<FisheyeCameraBridge>, config::osprey::sensors::FisheyeCamera::N_CAMERAS>
+            camera_bridges_;
 };

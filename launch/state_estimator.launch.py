@@ -3,7 +3,7 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction, LogInfo
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -19,10 +19,13 @@ def generate_launch_description():
 
     # Timestamped bag name
     timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M.%S')
-    # bag_name = f"sim_{timestamp}"
-    bag_name = "fix"
+    bag_name = f"sim_{timestamp}"
+    bag_name_latest = "latest"
     common_ekf_record_file = (
         Path("src") / "tauv_core" / "odometry_visualization" / "rosbags" / bag_name
+    )
+    common_ekf_record_file_latest = (
+        Path("src") / "tauv_core" / "odometry_visualization" / "rosbags" / bag_name_latest
     )
     print(f"Recording EKF data to: {common_ekf_record_file}")
 
@@ -36,7 +39,7 @@ def generate_launch_description():
                 executable="tauv_sim",
                 name="tauv_sim",
                 parameters=[str(sim_param_file)],
-                arguments=["--kinematic", str(trajectory_file)],
+                # arguments=["--kinematic", str(trajectory_file)],
                 output="screen",
             ),
             Node(
@@ -51,12 +54,18 @@ def generate_launch_description():
                 name="dvl_converter",
                 output="screen",
             ),
-            Node(
-                package="robot_localization",
-                executable="ekf_node",
-                name="ekf_filter_node",
-                parameters=[str(common_ekf_file)],
-                output="screen",
+            TimerAction(
+                period=8.0,
+                actions=[
+                    LogInfo(msg="Starting EKF filter node!!!!!!"),
+                    Node(
+                        package="robot_localization",
+                        executable="ekf_node",
+                        name="ekf_filter_node",
+                        parameters=[str(common_ekf_file)],
+                        output="screen",
+                    ),
+                ],
             ),
             ExecuteProcess(
                 condition=IfCondition(LaunchConfiguration('record')),
@@ -67,6 +76,18 @@ def generate_launch_description():
                     '/odometry/filtered',
                     '-o',
                     str(common_ekf_record_file),
+                ],
+                output='screen',
+            ),
+            ExecuteProcess(
+                condition=IfCondition(LaunchConfiguration('record')),
+                cmd=[
+                    'ros2',
+                    'bag',
+                    'record',
+                    '/odometry/filtered',
+                    '-o',
+                    str(common_ekf_record_file_latest),
                 ],
                 output='screen',
             ),

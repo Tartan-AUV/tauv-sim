@@ -21,18 +21,33 @@ OspreySensors::OspreySensors(std::string prefix,
       frames_(frames),
       body_T_cad_(body_T_cad),
       cameras_enabled_(enable_cameras) {
+
     const auto depth_params = config_loader_->get_depth_params();
     pressure_sensor_ = std::make_unique<sf::Pressure>("pressure_sensor", depth_params.update_rate);
     pressure_sensor_->setNoise(depth_params.noise_std);
     pressure_sensor_->setRange(200'000);
+    auto pressure_pub =
+        node_->create_publisher<sensor_msgs::msg::FluidPressure>(prefix_ + "/sensors/pressure", 10);
+    pressure_bridge_ = std::make_unique<PressureSensorBridge>(pressure_sensor_.get(),
+                                                              pressure_pub,
+                                                              prefix_ + "/pressure_link");
 
     const auto imu_params = config_loader_->get_imu_params();
-    imu_sensor_ = std::make_unique<sf::IMU>("imu", imu_params.update_rate);
-    imu_sensor_->setRange(imu_params.angular_velocity_range, imu_params.linear_acceleration_range);
-    imu_sensor_->setNoise(imu_params.angle_std,
-                          imu_params.angular_velocity_std,
-                          imu_params.yaw_angle_drift,
-                          imu_params.linear_acceleration_std);
+    for (size_t i = 0; i < imu_params.size(); ++i) {
+        const auto& imu_cfg = imu_params[i];
+        imu_sensors_[i] = std::make_unique<sf::IMU>("imu" + std::to_string(i),
+                                                      imu_cfg.update_rate);
+        imu_sensors_[i]->setRange(imu_cfg.angular_velocity_range, imu_cfg.linear_acceleration_range);
+        imu_sensors_[i]->setNoise(imu_cfg.angle_std,
+                                  imu_cfg.angular_velocity_std,
+                                  imu_cfg.yaw_angle_drift,
+                                  imu_cfg.linear_acceleration_std);
+        auto imu_pub = node_->create_publisher<sensor_msgs::msg::Imu>(prefix_ + "/sensors/imu" + std::to_string(i), 10);
+        imu_bridges_[i] = std::make_unique<ImuBridge>(imu_sensors_[i].get(),
+                                                      imu_pub,
+                                                      prefix_ + "/imu" + std::to_string(i) + "_link",
+                                                      imu_params[i]);
+    }
 
     const auto dvl_params = config_loader_->get_dvl_params();
     dvl_sensor_ = std::make_unique<sf::DVL>("dvl",
@@ -45,17 +60,7 @@ OspreySensors::OspreySensors(std::string prefix,
                           0,
                           0,
                           0);
-
-    auto pressure_pub =
-        node_->create_publisher<sensor_msgs::msg::FluidPressure>(prefix_ + "/sensors/pressure", 10);
-    auto imu_pub = node_->create_publisher<sensor_msgs::msg::Imu>(prefix_ + "/sensors/imu", 10);
     auto dvl_pub = node_->create_publisher<tauv_msgs::msg::Dvl>(prefix_ + "/sensors/dvl", 10);
-
-    pressure_bridge_ = std::make_unique<PressureSensorBridge>(pressure_sensor_.get(),
-                                                              pressure_pub,
-                                                              prefix_ + "/pressure_link");
-    imu_bridge_ =
-        std::make_unique<ImuBridge>(imu_sensor_.get(), imu_pub, prefix_ + "/imu_link", imu_params);
     dvl_bridge_ =
         std::make_unique<DvlBridge>(dvl_sensor_.get(), dvl_pub, prefix_ + "/dvl_link", dvl_params);
 
@@ -111,14 +116,13 @@ OspreySensors::OspreySensors(std::string prefix,
         t.transform.rotation.y = T.getRotation().y();
         t.transform.rotation.z = T.getRotation().z();
         t.transform.rotation.w = T.getRotation().w();
-        std::cout << "TF Rotations: " << child_suffix << " "
-                  << t.transform.rotation.x << " " << t.transform.rotation.y << " "
-                  << t.transform.rotation.z << " " << t.transform.rotation.w << std::endl;
         tfs.push_back(t);
     };
 
     add_tf(body_T_depth(), "/pressure_link");
-    add_tf(body_T_imu(), "/imu_link");
+    for (size_t i = 0; i < imu_sensors_.size(); ++i) {
+        add_tf(body_T_imu(i), "/imu" + std::to_string(i) + "_link");
+    }
     add_tf(body_T_dvl(), "/dvl_link");
 
     if (cameras_enabled_) {
@@ -150,7 +154,11 @@ void OspreySensors::attach_to_robot(sf::FeatherstoneRobot* robot) {
     }
 
     robot->AddLinkSensor(pressure_sensor_.get(), links::OSPREY_BASE, body_T_depth());
-    robot->AddLinkSensor(imu_sensor_.get(), links::OSPREY_BASE, body_T_imu());
+    for (size_t i = 0; i < imu_sensors_.size(); ++i) {
+        if (imu_sensors_[i]) {
+            robot->AddLinkSensor(imu_sensors_[i].get(), links::OSPREY_BASE, body_T_imu(i));
+        }
+    }
     robot->AddLinkSensor(dvl_sensor_.get(), links::OSPREY_BASE, body_T_dvl());
     if (cameras_enabled_) {
         for (size_t i = 0; i < cameras_.size(); ++i) {
@@ -168,11 +176,19 @@ void OspreySensors::attach_to_animated(sf::AnimatedEntity* entity,
     }
 
     pressure_sensor_->AttachToSolid(entity, body_T_depth());
-    imu_sensor_->AttachToSolid(entity, body_T_imu());
+    for (size_t i = 0; i < imu_sensors_.size(); ++i) {
+        if (imu_sensors_[i]) {
+            imu_sensors_[i]->AttachToSolid(entity, body_T_imu(i));
+        }
+    }
     dvl_sensor_->AttachToSolid(entity, body_T_dvl());
 
     sim_manager->AddSensor(pressure_sensor_.get());
-    sim_manager->AddSensor(imu_sensor_.get());
+    for (auto& imu : imu_sensors_) {
+        if (imu) {
+            sim_manager->AddSensor(imu.get());
+        }
+    }
     sim_manager->AddSensor(dvl_sensor_.get());
 
     if (cameras_enabled_) {
@@ -190,8 +206,10 @@ void OspreySensors::on_step(const Context& ctx) {
     if (pressure_bridge_) {
         pressure_bridge_->on_step(ctx);
     }
-    if (imu_bridge_) {
-        imu_bridge_->on_step(ctx);
+    for (auto& imu_bridge : imu_bridges_) {
+        if (imu_bridge) {
+            imu_bridge->on_step(ctx);
+        }
     }
     if (dvl_bridge_) {
         dvl_bridge_->on_step(ctx);
@@ -211,7 +229,12 @@ sf::Transform OspreySensors::body_T_depth() const {
 
 sf::Transform OspreySensors::body_T_dvl() const { return body_T_cad_ * frames_.cad_T_dvl; }
 
-sf::Transform OspreySensors::body_T_imu() const { return body_T_cad_ * frames_.cad_T_imu; }
+sf::Transform OspreySensors::body_T_imu(size_t idx) const {
+    if (idx == 0) {
+        return body_T_cad_ * frames_.cad_T_imu0;
+    }
+    return body_T_cad_ * frames_.cad_T_imu1;
+}
 
 sf::Transform OspreySensors::body_T_cam(size_t idx) const {
     if (idx == 0) {

@@ -34,7 +34,8 @@ struct Frames {
     sf::Transform cad_T_dvl;
 
     // Transform from the IMU frame into the CAD frame
-    sf::Transform cad_T_imu;
+    sf::Transform cad_T_imu0;
+    sf::Transform cad_T_imu1;
 
     // Transforms from the camera frames into the CAD frame
     sf::Transform cad_T_cam0;
@@ -70,7 +71,8 @@ struct Depth {
 };
 
 struct Imu {
-    static constexpr std::string_view NS = "osprey.sensors.imu";
+    static constexpr std::string_view NS = "osprey.sensors.imus";
+    static constexpr size_t N_IMUS = 2;
 
     double update_rate;
     sf::Vector3 angle_std;
