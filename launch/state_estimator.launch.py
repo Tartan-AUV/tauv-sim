@@ -42,18 +42,6 @@ def generate_launch_description():
                 # arguments=["--kinematic", str(trajectory_file)],
                 output="screen",
             ),
-            Node(
-                package="tauv_core",
-                executable="depth_converter",
-                name="depth_converter",
-                output="screen",
-            ),
-            Node(
-                package="tauv_core",
-                executable="dvl_converter",
-                name="dvl_converter",
-                output="screen",
-            ),
             TimerAction(
                 period=8.0,
                 actions=[

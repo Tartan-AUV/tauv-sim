@@ -27,7 +27,7 @@ OspreySensors::OspreySensors(std::string prefix,
     pressure_sensor_->setNoise(depth_params.noise_std);
     pressure_sensor_->setRange(200'000);
     auto pressure_pub =
-        node_->create_publisher<sensor_msgs::msg::FluidPressure>(prefix_ + "/sensors/pressure", 10);
+        node_->create_publisher<nav_msgs::msg::Odometry>(prefix_ + "/sensors/pressure", 10);
     pressure_bridge_ = std::make_unique<PressureSensorBridge>(pressure_sensor_.get(),
                                                               pressure_pub,
                                                               prefix_ + "/pressure_link");
@@ -60,7 +60,7 @@ OspreySensors::OspreySensors(std::string prefix,
                           0,
                           0,
                           0);
-    auto dvl_pub = node_->create_publisher<tauv_msgs::msg::Dvl>(prefix_ + "/sensors/dvl", 10);
+    auto dvl_pub = node_->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(prefix_ + "/sensors/dvl", 10);
     dvl_bridge_ =
         std::make_unique<DvlBridge>(dvl_sensor_.get(), dvl_pub, prefix_ + "/dvl_link", dvl_params);
 

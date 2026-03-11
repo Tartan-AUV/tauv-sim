@@ -16,7 +16,7 @@ std::array<double, 9> diagonal_from_stddev(const sf::Vector3& stddev) {
 }  // namespace
 
 DvlBridge::DvlBridge(sf::DVL* sensor,
-                     rclcpp::Publisher<tauv_msgs::msg::Dvl>::SharedPtr pub,
+                     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr pub,
                      std::string frame_id,
                      const config::osprey::sensors::Dvl& cfg)
     : sensor_(sensor),
@@ -34,16 +34,23 @@ void DvlBridge::on_step(const Context& ctx) {
     const double lin_vel_y = sensor_->getLastValue(1);
     const double lin_vel_z = sensor_->getLastValue(2);
 
-    tauv_msgs::msg::Dvl msg;
-    msg.header.frame_id = frame_id_;
+    geometry_msgs::msg::TwistWithCovarianceStamped msg;
+    msg.header.frame_id = "dvl_link";
     msg.header.stamp = ctx.get_ros_time();
 
-    msg.linear_velocity.x = lin_vel_x;
-    msg.linear_velocity.y = lin_vel_y;
-    msg.linear_velocity.z = lin_vel_z;
+    msg.twist.twist.linear.x = lin_vel_x;
+    msg.twist.twist.linear.y = lin_vel_y;
+    msg.twist.twist.linear.z = lin_vel_z;
+    msg.twist.twist.angular.x = 0.0;
+    msg.twist.twist.angular.y = 0.0;
+    msg.twist.twist.angular.z = 0.0;
 
-    msg.linear_velocity_percent_noise = linear_velocity_percent_noise_;
-    msg.linear_velocity_stddev_noise = linear_velocity_stddev_noise_;
+    msg.twist.covariance.fill(1e6);  // Large default covariance for unmeasured variables
+    const auto lin_vel_cov = diagonal_from_stddev(sf::Vector3(
+        linear_velocity_percent_noise_ * std::abs(lin_vel_x) + linear_velocity_stddev_noise_,
+        linear_velocity_percent_noise_ * std::abs(lin_vel_y) + linear_velocity_stddev_noise_,
+        linear_velocity_percent_noise_ * std::abs(lin_vel_z) + linear_velocity_stddev_noise_));
+    std::copy(lin_vel_cov.begin(), lin_vel_cov.end(), msg.twist.covariance.begin());
 
     pub_->publish(msg);
 }
