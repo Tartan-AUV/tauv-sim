@@ -67,8 +67,8 @@
                         linear_acceleration_range: [20.0, 20.0, 20.0]
                 dvl:
                     update_rate: 10.0
-                    linear_velocity_percent_noise: 0.0
-                    linear_velocity_stddev_noise: 0.0
+                    linear_velocity_percent_noise: 0.0101
+                    linear_velocity_stddev_noise: 0.0001
                     linear_velocity_range: [10.0, 10.0, 10.0]
                 cameras:
                     cam0:
