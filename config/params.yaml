@@ -46,7 +46,7 @@
 
             sensors:
                 depth:
-                    noise_std: 0.001
+                    noise_std: 9.80665
                     update_rate: 100.0
                 imus:
                     imu0: # xsens

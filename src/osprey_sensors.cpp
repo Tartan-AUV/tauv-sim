@@ -26,10 +26,10 @@ OspreySensors::OspreySensors(std::string prefix,
     pressure_sensor_->setNoise(depth_params.noise_std);
     pressure_sensor_->setRange(200'000);
     auto pressure_pub =
-        node_->create_publisher<nav_msgs::msg::Odometry>(prefix_ + "/sensors/pressure", 10);
+        node_->create_publisher<nav_msgs::msg::Odometry>(prefix_ + "/sensors/depth", 10);
     pressure_bridge_ = std::make_unique<PressureSensorBridge>(pressure_sensor_.get(),
                                                               pressure_pub,
-                                                              prefix_ + "/pressure_link");
+                                                              prefix_ + "/depth_link");
 
     const auto imu_params = config_loader_->get_imu_params();
     const auto& imu_cfg = imu_params[0];
@@ -40,11 +40,10 @@ OspreySensors::OspreySensors(std::string prefix,
                               imu_cfg.yaw_angle_drift,
                               imu_cfg.linear_acceleration_std);
     auto imu_pub =
-        node_->create_publisher<sensor_msgs::msg::Imu>(prefix_ + "/sensors/imu" + std::to_string(0),
-                                                       10);
+        node_->create_publisher<sensor_msgs::msg::Imu>(prefix_ + "/sensors/imu_xsens", 10);
     imu_bridges_[0] = std::make_unique<ImuBridge>(imu_sensors_[0].get(),
                                                   imu_pub,
-                                                  prefix_ + "/imu" + std::to_string(0) + "_link",
+                                                  prefix_ + "/imu_link_xsens",
                                                   imu_params[0]);
 
     const auto dvl_params = config_loader_->get_dvl_params();

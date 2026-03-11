@@ -10,6 +10,7 @@ PressureSensorBridge::PressureSensorBridge(
 
 void PressureSensorBridge::on_step(const Context& ctx) {
     if (sensor_pressure_->isNewDataAvailable()) {
+        // std::cout << "Pressure: " << sensor_pressure_->getLastValue(0) << " Pa" << std::endl;
         const float pressure = sensor_pressure_->getLastValue(0);
         const float stddev = sensor_pressure_->getSensorChannelDescription(0).stdDev / 9806.65;  // Convert pressure stddev to depth stddev
 
@@ -17,7 +18,7 @@ void PressureSensorBridge::on_step(const Context& ctx) {
         depth_msg.header.stamp = ctx.get_ros_time();
         depth_msg.header.frame_id = "odom";
         depth_msg.child_frame_id = "depth_link";
-        depth_msg.pose.pose.position.z = -(pressure - 101325.0) / 9806.65;
+        depth_msg.pose.pose.position.z = -pressure / 9806.65;
         depth_msg.pose.covariance.fill(1e6);
         depth_msg.twist.covariance.fill(1e6);
         depth_msg.pose.covariance[14] = stddev * stddev; // Convert from variance to covariance
