@@ -46,18 +46,18 @@
 
             sensors:
                 depth:
-                    noise_std: 0.0
+                    noise_std: 0.001
                     update_rate: 100.0
                 imus:
-                    imu0:
+                    imu0: # xsens
                         update_rate: 200.0
-                        angle_std: [3.6459e-5, 3.3266e-5, 2.9197e-5]
-                        angular_velocity_std: [0.1, 0.1, 0.1]
+                        angle_std: [0.0087266, 0.0087266, 0.0174533] # 0.5 deg/s, 0.5 deg/s, 1 deg/s
+                        angular_velocity_std: [0.0010488, 0.0010488, 0.0010488]
                         yaw_angle_drift: 0.0
-                        linear_acceleration_std: [0.1, 0.1, 0.1]
+                        linear_acceleration_std: [0.0031622, 0.0031622, 0.0031622]
                         angular_velocity_range: [10.0, 10.0, 10.0]
                         linear_acceleration_range: [20.0, 20.0, 20.0]
-                    imu1:
+                    imu1: # fog
                         update_rate: 200.0
                         angle_std: [3.6459e-5, 3.3266e-5, 2.9197e-5]
                         angular_velocity_std: [3.6459e-5, 3.3266e-5, 2.9197e-5]

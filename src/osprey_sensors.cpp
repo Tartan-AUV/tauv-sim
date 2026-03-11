@@ -21,7 +21,6 @@ OspreySensors::OspreySensors(std::string prefix,
       frames_(frames),
       body_T_cad_(body_T_cad),
       cameras_enabled_(enable_cameras) {
-
     const auto depth_params = config_loader_->get_depth_params();
     pressure_sensor_ = std::make_unique<sf::Pressure>("pressure_sensor", depth_params.update_rate);
     pressure_sensor_->setNoise(depth_params.noise_std);
@@ -33,34 +32,37 @@ OspreySensors::OspreySensors(std::string prefix,
                                                               prefix_ + "/pressure_link");
 
     const auto imu_params = config_loader_->get_imu_params();
-    for (size_t i = 0; i < imu_params.size(); ++i) {
-        const auto& imu_cfg = imu_params[i];
-        imu_sensors_[i] = std::make_unique<sf::IMU>("imu" + std::to_string(i),
-                                                      imu_cfg.update_rate);
-        imu_sensors_[i]->setRange(imu_cfg.angular_velocity_range, imu_cfg.linear_acceleration_range);
-        imu_sensors_[i]->setNoise(imu_cfg.angle_std,
-                                  imu_cfg.angular_velocity_std,
-                                  imu_cfg.yaw_angle_drift,
-                                  imu_cfg.linear_acceleration_std);
-        auto imu_pub = node_->create_publisher<sensor_msgs::msg::Imu>(prefix_ + "/sensors/imu" + std::to_string(i), 10);
-        imu_bridges_[i] = std::make_unique<ImuBridge>(imu_sensors_[i].get(),
-                                                      imu_pub,
-                                                      prefix_ + "/imu" + std::to_string(i) + "_link",
-                                                      imu_params[i]);
-    }
+    const auto& imu_cfg = imu_params[0];
+    imu_sensors_[0] = std::make_unique<sf::IMU>("imu_xsens", imu_cfg.update_rate);
+    imu_sensors_[0]->setRange(imu_cfg.angular_velocity_range, imu_cfg.linear_acceleration_range);
+    imu_sensors_[0]->setNoise(imu_cfg.angle_std,
+                              imu_cfg.angular_velocity_std,
+                              imu_cfg.yaw_angle_drift,
+                              imu_cfg.linear_acceleration_std);
+    auto imu_pub =
+        node_->create_publisher<sensor_msgs::msg::Imu>(prefix_ + "/sensors/imu" + std::to_string(0),
+                                                       10);
+    imu_bridges_[0] = std::make_unique<ImuBridge>(imu_sensors_[0].get(),
+                                                  imu_pub,
+                                                  prefix_ + "/imu" + std::to_string(0) + "_link",
+                                                  imu_params[0]);
 
     const auto dvl_params = config_loader_->get_dvl_params();
     dvl_sensor_ = std::make_unique<sf::DVL>("dvl",
                                             7,
                                             true,
-                                            dvl_params.update_rate);  // Stonefish uses NED so I think true is correct?
+                                            dvl_params.update_rate);  // Stonefish uses NED so I
+                                                                      // think true is correct?
     dvl_sensor_->setRange(dvl_params.linear_velocity_range, 1, 5);
     dvl_sensor_->setNoise(dvl_params.linear_velocity_percent_noise,
                           dvl_params.linear_velocity_stddev_noise,
                           0,
                           0,
                           0);
-    auto dvl_pub = node_->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(prefix_ + "/sensors/dvl", 10);
+    auto dvl_pub =
+        node_->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(prefix_ +
+                                                                                    "/sensors/dvl",
+                                                                                10);
     dvl_bridge_ =
         std::make_unique<DvlBridge>(dvl_sensor_.get(), dvl_pub, prefix_ + "/dvl_link", dvl_params);
 
@@ -95,57 +97,57 @@ OspreySensors::OspreySensors(std::string prefix,
         }
     }
 
-    // Make sure the tf broadcaster is only made once
-    static std::shared_ptr<tf2_ros::StaticTransformBroadcaster> tf_broadcaster;
-    if (!tf_broadcaster)
-        tf_broadcaster = std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_);
+    // // Make sure the tf broadcaster is only made once
+    // static std::shared_ptr<tf2_ros::StaticTransformBroadcaster> tf_broadcaster;
+    // if (!tf_broadcaster)
+    //     tf_broadcaster = std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_);
 
-    std::vector<geometry_msgs::msg::TransformStamped> tfs;
-    rclcpp::Time now = node_->get_clock()->now();
+    // std::vector<geometry_msgs::msg::TransformStamped> tfs;
+    // rclcpp::Time now = node_->get_clock()->now();
 
-    // Turn all the stonefish transforms into tf transforms
-    auto add_tf = [&](const sf::Transform& T, const std::string& child_suffix) {
-        geometry_msgs::msg::TransformStamped t;
-        t.header.stamp = now;
-        t.header.frame_id = prefix_ + "/base_link_ned";
-        t.child_frame_id = prefix_ + child_suffix;
-        t.transform.translation.x = T.getOrigin().x();
-        t.transform.translation.y = T.getOrigin().y();
-        t.transform.translation.z = T.getOrigin().z();
-        t.transform.rotation.x = T.getRotation().x();
-        t.transform.rotation.y = T.getRotation().y();
-        t.transform.rotation.z = T.getRotation().z();
-        t.transform.rotation.w = T.getRotation().w();
-        tfs.push_back(t);
-    };
+    // // Turn all the stonefish transforms into tf transforms
+    // auto add_tf = [&](const sf::Transform& T, const std::string& child_suffix) {
+    //     geometry_msgs::msg::TransformStamped t;
+    //     t.header.stamp = now;
+    //     t.header.frame_id = prefix_ + "/base_link_ned";
+    //     t.child_frame_id = prefix_ + child_suffix;
+    //     t.transform.translation.x = T.getOrigin().x();
+    //     t.transform.translation.y = T.getOrigin().y();
+    //     t.transform.translation.z = T.getOrigin().z();
+    //     t.transform.rotation.x = T.getRotation().x();
+    //     t.transform.rotation.y = T.getRotation().y();
+    //     t.transform.rotation.z = T.getRotation().z();
+    //     t.transform.rotation.w = T.getRotation().w();
+    //     tfs.push_back(t);
+    // };
 
-    add_tf(body_T_depth(), "/pressure_link");
-    for (size_t i = 0; i < imu_sensors_.size(); ++i) {
-        add_tf(body_T_imu(i), "/imu" + std::to_string(i) + "_link");
-    }
-    add_tf(body_T_dvl(), "/dvl_link");
+    // add_tf(body_T_depth(), "/pressure_link");
+    // for (size_t i = 0; i < imu_sensors_.size(); ++i) {
+    //     add_tf(body_T_imu(i), "/imu" + std::to_string(i) + "_link");
+    // }
+    // add_tf(body_T_dvl(), "/dvl_link");
 
-    if (cameras_enabled_) {
-        for (size_t i = 0; i < cameras_.size(); ++i) {
-            add_tf(body_T_cam(i), "/cam" + std::to_string(i) + "_optical");
-        }
-    }
+    // if (cameras_enabled_) {
+    //     for (size_t i = 0; i < cameras_.size(); ++i) {
+    //         add_tf(body_T_cam(i), "/cam" + std::to_string(i) + "_optical");
+    //     }
+    // }
 
-    // The body is in the NED frame, we add a transform in between to change to ENU for ROS
-    geometry_msgs::msg::TransformStamped enu_t_ned;
-    enu_t_ned.header.stamp = now;
-    enu_t_ned.header.frame_id = prefix_ + "/base_link";      // ENU is Parent
-    enu_t_ned.child_frame_id = prefix_ + "/base_link_ned";  // NED is Child
-    enu_t_ned.transform.translation.x = 0.0;
-    enu_t_ned.transform.translation.y = 0.0;
-    enu_t_ned.transform.translation.z = 0.0;
-    enu_t_ned.transform.rotation.w = 0.0;
-    enu_t_ned.transform.rotation.x = 1/std::sqrt(2);
-    enu_t_ned.transform.rotation.y = 1/std::sqrt(2);
-    enu_t_ned.transform.rotation.z = 0.0;
-    tfs.push_back(enu_t_ned);
+    // // The body is in the NED frame, we add a transform in between to change to ENU for ROS
+    // geometry_msgs::msg::TransformStamped enu_t_ned;
+    // enu_t_ned.header.stamp = now;
+    // enu_t_ned.header.frame_id = prefix_ + "/base_link";      // ENU is Parent
+    // enu_t_ned.child_frame_id = prefix_ + "/base_link_ned";  // NED is Child
+    // enu_t_ned.transform.translation.x = 0.0;
+    // enu_t_ned.transform.translation.y = 0.0;
+    // enu_t_ned.transform.translation.z = 0.0;
+    // enu_t_ned.transform.rotation.w = 0.0;
+    // enu_t_ned.transform.rotation.x = 1/std::sqrt(2);
+    // enu_t_ned.transform.rotation.y = 1/std::sqrt(2);
+    // enu_t_ned.transform.rotation.z = 0.0;
+    // tfs.push_back(enu_t_ned);
 
-    tf_broadcaster->sendTransform(tfs);
+    // tf_broadcaster->sendTransform(tfs);
 }
 
 void OspreySensors::attach_to_robot(sf::FeatherstoneRobot* robot) {

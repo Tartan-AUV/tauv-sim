@@ -49,7 +49,7 @@ void ImuBridge::on_step(const Context& ctx) {
     Eigen::Quaterniond orientation = yaw_angle * pitch_angle * roll_angle;
 
     sensor_msgs::msg::Imu msg;
-    msg.header.frame_id = "imu_link";
+    msg.header.frame_id = "imu_link_xsens";
     msg.header.stamp = ctx.get_ros_time();
 
     msg.orientation.w = orientation.w();

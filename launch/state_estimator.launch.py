@@ -15,7 +15,7 @@ def generate_launch_description():
     trajectory_file = sim_share_dir / "config" / "trajectories" / "osprey_square.yaml"
 
     common_share_dir = Path(get_package_share_directory("tauv_core"))
-    common_ekf_file = common_share_dir / "config" / "ekf.yaml"
+    common_ekf_file = common_share_dir / "config" / "ekfFUNNY.yaml"
 
     # Timestamped bag name
     timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M.%S')
@@ -32,7 +32,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument(
-                'record', default_value='true', description='Enable rosbag recording'
+                'record', default_value='false', description='Enable rosbag recording'
             ),
             Node(
                 package="tauv_sim",
@@ -78,6 +78,30 @@ def generate_launch_description():
                     str(common_ekf_record_file_latest),
                 ],
                 output='screen',
+            ),
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='base_link_to_imu',
+                arguments=['0', '0', '0', '0', '0', '0', 'os/base_link', 'imu_link_xsens'],
+                parameters=[{'use_sim_time': True}],
+                output='screen'
+            ),
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='base_link_to_depth',
+                arguments=['0', '0', '0', '0', '0', '0', 'os/base_link', 'depth_link'],
+                parameters=[{'use_sim_time': True}],
+                output='screen'
+            ),
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='base_link_to_dvl',
+                arguments=['0', '0', '0', '1.5708', '0', '-3.14159', 'os/base_link', 'dvl_link'],
+                parameters=[{'use_sim_time': True}],
+                output='screen'
             ),
         ]
     )
