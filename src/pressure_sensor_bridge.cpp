@@ -10,7 +10,6 @@ PressureSensorBridge::PressureSensorBridge(
 
 void PressureSensorBridge::on_step(const Context& ctx) {
     if (sensor_pressure_->isNewDataAvailable()) {
-        // std::cout << "Pressure: " << sensor_pressure_->getLastValue(0) << " Pa" << std::endl;
         const float pressure = sensor_pressure_->getLastValue(0);
         const float stddev = sensor_pressure_->getSensorChannelDescription(0).stdDev / 9806.65;  // Convert pressure stddev to depth stddev
 
