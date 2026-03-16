@@ -30,6 +30,11 @@ void DvlBridge::on_step(const Context& ctx) {
         return;
     }
 
+    if (sensor_->getLastValue(7) == 3) {  // No ping at all
+        std::cout << "DVL: No ping available, skipping publish." << std::endl;
+        return;
+    }
+
     // 1. Get raw velocities in Stonefish FRD (Forward-Right-Down) frame
     const double raw_lin_vel_x = sensor_->getLastValue(0);
     const double raw_lin_vel_y = sensor_->getLastValue(1);

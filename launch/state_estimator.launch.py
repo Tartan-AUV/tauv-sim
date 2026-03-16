@@ -22,10 +22,10 @@ def generate_launch_description():
     bag_name = f"sim_{timestamp}"
     bag_name_latest = "latest"
     common_ekf_record_file = (
-        Path("src") / "tauv_core" / "odometry_visualization" / "rosbags" / bag_name
+        Path("/tauv-mono/ros_ws") / "bags" / bag_name
     )
     common_ekf_record_file_latest = (
-        Path("src") / "tauv_core" / "odometry_visualization" / "rosbags" / bag_name_latest
+        Path("/tauv-mono/ros_ws") / "bags" / bag_name_latest
     )
     print(f"Recording EKF data to: {common_ekf_record_file}")
 
