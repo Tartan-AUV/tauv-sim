@@ -26,6 +26,8 @@ ImuBridge::ImuBridge(sf::IMU* sensor,
       angular_velocity_covariance_(diagonal_from_stddev(cfg.angular_velocity_std)),
       linear_acceleration_covariance_(diagonal_from_stddev(cfg.linear_acceleration_std)) {}
 
+#include <cmath> // Ensure this is included for M_PI and M_PI_2
+
 void ImuBridge::on_step(const Context& ctx) {
     if (!sensor_->isNewDataAvailable()) {
         return;
@@ -43,33 +45,48 @@ void ImuBridge::on_step(const Context& ctx) {
     const double lin_accel_y = sensor_->getLastValue(7);
     const double lin_accel_z = sensor_->getLastValue(8);
 
+    // 1. Calculate the raw orientation from the simulator (NED to FRD)
     Eigen::AngleAxisd roll_angle(roll, Eigen::Vector3d::UnitX());
     Eigen::AngleAxisd pitch_angle(pitch, Eigen::Vector3d::UnitY());
     Eigen::AngleAxisd yaw_angle(yaw, Eigen::Vector3d::UnitZ());
-    Eigen::Quaterniond orientation = yaw_angle * pitch_angle * roll_angle;
+    Eigen::Quaterniond q_ned_to_frd = yaw_angle * pitch_angle * roll_angle;
+
+    // 2. Define the rotations to standard ROS frames
+    // Rotate global frame from ENU to NED (Yaw 90 degrees, Roll 180 degrees)
+    Eigen::Quaterniond q_enu_to_ned = Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX());
+
+    // Rotate body frame from FRD to FLU (Roll 180 degrees)
+    Eigen::Quaterniond q_frd_to_flu(Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()));
+
+    // 3. Compute the final ENU to FLU orientation
+    Eigen::Quaterniond final_orientation = q_enu_to_ned * q_ned_to_frd * q_frd_to_flu;
+    final_orientation.normalize(); // Good practice to prevent drifting floating point errors
 
     sensor_msgs::msg::Imu msg;
-    msg.header.frame_id = frame_id_;
+    msg.header.frame_id = "imu_xsens_link";
     msg.header.stamp = ctx.get_ros_time();
 
-    msg.orientation.w = orientation.w();
-    msg.orientation.x = orientation.x();
-    msg.orientation.y = orientation.y();
-    msg.orientation.z = orientation.z();
+    // Apply final converted orientation
+    msg.orientation.w = final_orientation.w();
+    msg.orientation.x = final_orientation.x();
+    msg.orientation.y = final_orientation.y();
+    msg.orientation.z = final_orientation.z();
     std::copy(orientation_covariance_.begin(),
               orientation_covariance_.end(),
               msg.orientation_covariance.begin());
 
+    // Convert angular velocity from FRD to FLU (invert Y and Z)
     msg.angular_velocity.x = ang_vel_x;
-    msg.angular_velocity.y = ang_vel_y;
-    msg.angular_velocity.z = ang_vel_z;
+    msg.angular_velocity.y = -ang_vel_y;
+    msg.angular_velocity.z = -ang_vel_z;
     std::copy(angular_velocity_covariance_.begin(),
               angular_velocity_covariance_.end(),
               msg.angular_velocity_covariance.begin());
 
+    // Convert linear acceleration from FRD to FLU (invert Y and Z)
     msg.linear_acceleration.x = lin_accel_x;
-    msg.linear_acceleration.y = lin_accel_y;
-    msg.linear_acceleration.z = lin_accel_z;
+    msg.linear_acceleration.y = -lin_accel_y;
+    msg.linear_acceleration.z = -lin_accel_z;
     std::copy(linear_acceleration_covariance_.begin(),
               linear_acceleration_covariance_.end(),
               msg.linear_acceleration_covariance.begin());

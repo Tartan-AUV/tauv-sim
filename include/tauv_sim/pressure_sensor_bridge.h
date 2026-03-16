@@ -2,14 +2,14 @@
 
 #include <sensors/scalar/Pressure.h>
 
-#include <sensor_msgs/msg/fluid_pressure.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 
 #include "tauv_sim/context.h"
 
 class PressureSensorBridge {
    public:
     PressureSensorBridge(sf::Pressure* sensor,
-                         rclcpp::Publisher<sensor_msgs::msg::FluidPressure>::SharedPtr pub,
+                         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub,
                          std::string frame_id);
 
     void on_step(const Context& ctx);
@@ -17,5 +17,5 @@ class PressureSensorBridge {
    private:
     sf::Pressure* sensor_pressure_;
     const std::string frame_id_;
-    rclcpp::Publisher<sensor_msgs::msg::FluidPressure>::SharedPtr pub_;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_;
 };

@@ -14,7 +14,7 @@ ThrusterBridge::ThrusterBridge(sf::Thruster* thruster,
     c_(cfg){}
 
 void ThrusterBridge::callback(tauv_msgs::msg::ThrusterSetpoint msg) {
-    double throttle = msg.enable != 0 ? msg.throttle : 0.0;
+    double throttle = msg.armed ? msg.thrust[thruster_esc_id_] : 0.0;
 
     assert(c_.K_t == 1.0);
     assert(c_.R_m == 1.0);

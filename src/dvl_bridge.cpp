@@ -16,7 +16,7 @@ std::array<double, 9> diagonal_from_stddev(const sf::Vector3& stddev) {
 }  // namespace
 
 DvlBridge::DvlBridge(sf::DVL* sensor,
-                     rclcpp::Publisher<tauv_msgs::msg::Dvl>::SharedPtr pub,
+                     rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr pub,
                      std::string frame_id,
                      const config::osprey::sensors::Dvl& cfg)
     : sensor_(sensor),
@@ -30,20 +30,52 @@ void DvlBridge::on_step(const Context& ctx) {
         return;
     }
 
-    const double lin_vel_x = sensor_->getLastValue(0);
-    const double lin_vel_y = sensor_->getLastValue(1);
-    const double lin_vel_z = sensor_->getLastValue(2);
+    if (sensor_->getLastValue(7) == 3) {  // No ping at all
+        std::cout << "DVL: No ping available, skipping publish." << std::endl;
+        return;
+    }
 
-    tauv_msgs::msg::Dvl msg;
-    msg.header.frame_id = frame_id_;
+    // 1. Get raw velocities in Stonefish FRD (Forward-Right-Down) frame
+    const double raw_lin_vel_x = sensor_->getLastValue(0);
+    const double raw_lin_vel_y = sensor_->getLastValue(1);
+    const double raw_lin_vel_z = sensor_->getLastValue(2);
+
+    // 2. Convert to ROS standard FLU (Forward-Left-Up) frame
+    const double flu_lin_vel_x = raw_lin_vel_x;
+    const double flu_lin_vel_y = -raw_lin_vel_y;
+    const double flu_lin_vel_z = -raw_lin_vel_z;
+
+    geometry_msgs::msg::TwistWithCovarianceStamped msg;
+    msg.header.frame_id = "dvl_link";
     msg.header.stamp = ctx.get_ros_time();
 
-    msg.linear_velocity.x = lin_vel_x;
-    msg.linear_velocity.y = lin_vel_y;
-    msg.linear_velocity.z = lin_vel_z;
+    // 3. Assign the converted velocities to the ROS message
+    msg.twist.twist.linear.x = flu_lin_vel_x;
+    msg.twist.twist.linear.y = flu_lin_vel_y;
+    msg.twist.twist.linear.z = flu_lin_vel_z;
+    msg.twist.twist.angular.x = 0.0;
+    msg.twist.twist.angular.y = 0.0;
+    msg.twist.twist.angular.z = 0.0;
 
-    msg.linear_velocity_percent_noise = linear_velocity_percent_noise_;
-    msg.linear_velocity_stddev_noise = linear_velocity_stddev_noise_;
+    msg.twist.covariance.fill(1e6);  // Large default covariance for unmeasured variables
+
+    // 4. Calculate covariance (std::abs handles the negative signs safely)
+    const auto proportional_cov = diagonal_from_stddev(sf::Vector3(
+        linear_velocity_percent_noise_ * std::abs(flu_lin_vel_x),
+        linear_velocity_percent_noise_ * std::abs(flu_lin_vel_y),
+        linear_velocity_percent_noise_ * std::abs(flu_lin_vel_z)));
+    const auto absolute_cov = diagonal_from_stddev(sf::Vector3(
+        linear_velocity_stddev_noise_,
+        linear_velocity_stddev_noise_,
+        linear_velocity_stddev_noise_));
+    std::array<double, 9> lin_vel_cov;
+    for (size_t i = 0; i < 9; ++i) {
+        lin_vel_cov[i] = proportional_cov[i] + absolute_cov[i];
+    }
+
+    for (size_t r = 0; r < 3; ++r) {
+        std::copy(lin_vel_cov.begin() + r * 3, lin_vel_cov.begin() + r * 3 + 3, msg.twist.covariance.begin() + r * 6);
+    }
 
     pub_->publish(msg);
 }

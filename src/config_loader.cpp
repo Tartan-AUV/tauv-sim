@@ -21,11 +21,12 @@ osprey::Frames ConfigLoader::get_frames() {
     auto cad_T_body = get_transform(ns, "cad", "body", false);
     auto t_depth_B = get_vector3(ns, "t_depth_B");
     auto cad_T_dvl = get_transform(ns, "cad", "dvl", false);
-    auto cad_T_imu = get_transform(ns, "cad", "imu", false);
+    auto cad_T_imu0 = get_transform(ns, "cad", "imu0", false);
+    auto cad_T_imu1 = get_transform(ns, "cad", "imu1", false);
     auto cad_T_cam0 = get_transform(ns, "cad", "cam0", false);
     auto cad_T_cam1 = get_transform(ns, "cad", "cam1", false);
 
-    return {cad_T_body, t_depth_B, cad_T_dvl, cad_T_imu, cad_T_cam0, cad_T_cam1};
+    return {cad_T_body, t_depth_B, cad_T_dvl, cad_T_imu0, cad_T_imu1, cad_T_cam0, cad_T_cam1};
 }
 
 osprey::InertialBuoyancy ConfigLoader::get_inertial_buoyancy_params() {
@@ -52,25 +53,30 @@ osprey::sensors::Depth ConfigLoader::get_depth_params() {
         update_rate,
     };
 }
+std::array<osprey::sensors::Imu, osprey::sensors::Imu::N_IMUS>
+ConfigLoader::get_imu_params() {
+    const auto base_ns = std::string{osprey::sensors::Imu::NS};
+    std::array<osprey::sensors::Imu, osprey::sensors::Imu::N_IMUS> imus{};
 
-osprey::sensors::Imu ConfigLoader::get_imu_params() {
-    const auto ns = std::string{osprey::sensors::Imu::NS};
+    for (size_t i = 0; i < osprey::sensors::Imu::N_IMUS; ++i) {
+        auto ns = base_ns + ".imu" + std::to_string(i);
+        auto angle_std = get_vector3(ns, "angle_std");
+        auto angular_velocity_std = get_vector3(ns, "angular_velocity_std");
+        auto linear_acceleration_std = get_vector3(ns, "linear_acceleration_std");
+        double yaw_angle_drift = get_scalar<double>(ns, "yaw_angle_drift");
+        auto angular_velocity_range = get_vector3(ns, "angular_velocity_range");
+        auto linear_acceleration_range = get_vector3(ns, "linear_acceleration_range");
+        double update_rate = get_scalar<double>(ns, "update_rate");
 
-    auto angle_std = get_vector3(ns, "angle_std");
-    auto angular_velocity_std = get_vector3(ns, "angular_velocity_std");
-    auto linear_acceleration_std = get_vector3(ns, "linear_acceleration_std");
-    double yaw_angle_drift = get_scalar<double>(ns, "yaw_angle_drift");
-    auto angular_velocity_range = get_vector3(ns, "angular_velocity_range");
-    auto linear_acceleration_range = get_vector3(ns, "linear_acceleration_range");
-    double update_rate = get_scalar<double>(ns, "update_rate");
-
-    return {update_rate,
-            angle_std,
-            angular_velocity_std,
-            yaw_angle_drift,
-            linear_acceleration_std,
-            angular_velocity_range,
-            linear_acceleration_range};
+        imus[i] = {update_rate,
+                    angle_std,
+                    angular_velocity_std,
+                    yaw_angle_drift,
+                    linear_acceleration_std,
+                    angular_velocity_range,
+                    linear_acceleration_range};
+    }
+    return imus;
 }
 
 osprey::sensors::Dvl ConfigLoader::get_dvl_params() {
