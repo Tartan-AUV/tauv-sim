@@ -1,3 +1,8 @@
+/**
+ * @file dvl_bridge.cpp
+ * @brief Implements publication of simulated DVL measurements to ROS.
+ */
+
 #include "tauv_sim/dvl_bridge.h"
 
 #include <Eigen/Geometry>
@@ -5,6 +10,9 @@
 
 namespace {
 
+/**
+ * @brief Builds a 3x3 diagonal covariance matrix from axis-wise standard deviations.
+ */
 std::array<double, 9> diagonal_from_stddev(const sf::Vector3& stddev) {
     const double sx = static_cast<double>(stddev.x());
     const double sy = static_cast<double>(stddev.y());
@@ -25,6 +33,9 @@ DvlBridge::DvlBridge(sf::DVL* sensor,
       linear_velocity_percent_noise_(cfg.linear_velocity_percent_noise),
       linear_velocity_stddev_noise_(cfg.linear_velocity_stddev_noise) {}
 
+/**
+ * @brief Publishes one DVL twist sample when new data is available.
+ */
 void DvlBridge::on_step(const Context& ctx) {
     if (!sensor_->isNewDataAvailable()) {
         return;

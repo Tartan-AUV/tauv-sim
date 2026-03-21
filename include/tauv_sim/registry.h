@@ -1,3 +1,8 @@
+/**
+ * @file registry.h
+ * @brief Defines shared material, visual, and link-name registries for tauv_sim.
+ */
+
 #pragma once
 
 #include <StonefishCommon.h>

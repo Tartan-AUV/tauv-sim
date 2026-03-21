@@ -1,4 +1,9 @@
 /******************************************************************************
+ * @file context.h
+ * @brief Defines per-step simulation context shared by tauv_sim components.
+ *****************************************************************************/
+
+/******************************************************************************
  *  TartanAUV - Carnegie Mellon University
  *
  *  Author:      root
@@ -17,5 +22,8 @@ struct Context {
 
     SimTime sim_time_;
 
+    /**
+     * @brief Converts simulation time into an rclcpp-compatible timestamp.
+     */
     rclcpp::Time get_ros_time() const;
 };

@@ -1,3 +1,6 @@
+# This file contains parameters for the sensors, actuators, frames needed
+# for the stonefish simulation
+
 /tauv_sim:
     ros__parameters:
         world_T_body_initial:

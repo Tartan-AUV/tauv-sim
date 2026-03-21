@@ -1,3 +1,8 @@
+/**
+ * @file tauv_simulation_manager.cpp
+ * @brief Implements scenario setup and per-step ROS integration for tauv_sim.
+ */
+
 #include "tauv_sim/tauv_simulation_manager.h"
 
 #include <entities/statics/Obstacle.h>
@@ -26,6 +31,9 @@ TauvSimulationManager::TauvSimulationManager(std::string assets_path,
     executor_.add_node(node_);
 }
 
+/**
+ * @brief Builds the simulated pool world and either dynamic or kinematic Osprey.
+ */
 void TauvSimulationManager::BuildScenario() {
     // Ocean configuration
     getMaterialManager()->CreateFluid("OceanWater", 1000.0, 0.002, 1.33);
@@ -75,6 +83,8 @@ void TauvSimulationManager::BuildScenario() {
 }
 
 void TauvSimulationManager::SimulationStepCompleted(sf::Scalar time_step) {
+    (void)time_step;
+
     // Update context
     ctx_.sim_time_ = std::chrono::nanoseconds(getSimulationClock() * 1000);
 

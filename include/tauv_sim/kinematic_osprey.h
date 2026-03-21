@@ -1,3 +1,8 @@
+/**
+ * @file kinematic_osprey.h
+ * @brief Declares a trajectory-driven Osprey model used for kinematic playback mode.
+ */
+
 #pragma once
 
 #include <entities/animation/PWLTrajectory.h>
@@ -19,6 +24,9 @@ class AnimatedEntity;
 
 class KinematicOsprey {
    public:
+    /**
+     * @brief Builds a kinematic Osprey entity and its sensor stack.
+     */
     KinematicOsprey(std::string prefix,
                     const std::string& assets_path,
                     rclcpp::Node::SharedPtr node,
@@ -26,12 +34,25 @@ class KinematicOsprey {
                     const trajectory::Spec& trajectory_spec,
                     bool enable_cameras = true);
 
+    /**
+     * @brief Registers the animated body and sensors with the simulation manager.
+     */
     void add_to_simulation(sf::SimulationManager* sim_manager);
+
+    /**
+     * @brief Advances ROS-side sensor publication for the current sim step.
+     */
     void on_step(const Context& ctx);
 
+    /**
+     * @brief Returns the underlying animated entity used in Stonefish.
+     */
     sf::AnimatedEntity* get_entity();
 
    private:
+    /**
+     * @brief Converts a loaded trajectory spec into a Stonefish PWL trajectory.
+     */
     void build_trajectory(const trajectory::Spec& spec);
     std::string prefix_;
     std::unique_ptr<sf::AnimatedEntity> animated_body_;

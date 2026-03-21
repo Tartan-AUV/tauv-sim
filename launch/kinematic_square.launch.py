@@ -1,3 +1,5 @@
+"""Launches tauv_sim in kinematic mode with the square reference trajectory."""
+
 from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
@@ -6,6 +8,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    """Builds a launch description for trajectory playback without dynamic thruster control."""
     share_dir = Path(get_package_share_directory("tauv_sim"))
     param_file = share_dir / "config" / "params.yaml"
     trajectory_file = share_dir / "config" / "trajectories" / "osprey_square.yaml"

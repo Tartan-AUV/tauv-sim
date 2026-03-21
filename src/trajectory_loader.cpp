@@ -1,3 +1,8 @@
+/**
+ * @file trajectory_loader.cpp
+ * @brief Implements YAML trajectory parsing for kinematic simulation mode.
+ */
+
 #include "tauv_sim/trajectory_loader.h"
 
 #include <yaml-cpp/yaml.h>
@@ -11,6 +16,9 @@
 
 namespace {
 
+/**
+ * @brief Parses playback mode string into Stonefish enum.
+ */
 sf::PlaybackMode parse_playback_mode(const YAML::Node& root) {
     if (!root["playback_mode"]) {
         return sf::PlaybackMode::ONETIME;
@@ -31,6 +39,9 @@ sf::PlaybackMode parse_playback_mode(const YAML::Node& root) {
                              " (expected onetime|repeat|boomerang)");
 }
 
+/**
+ * @brief Parses a YAML 3-vector into Stonefish vector type.
+ */
 sf::Vector3 to_vector3(const YAML::Node& node) {
     if (!node.IsSequence() || node.size() != 3) {
         throw std::runtime_error("position must be a 3-element list");
@@ -38,6 +49,9 @@ sf::Vector3 to_vector3(const YAML::Node& node) {
     return sf::Vector3{node[0].as<double>(), node[1].as<double>(), node[2].as<double>()};
 }
 
+/**
+ * @brief Converts roll/pitch/yaw degrees into a rotation matrix.
+ */
 Eigen::Matrix3d rpy_to_matrix(const YAML::Node& node) {
     if (!node.IsSequence() || node.size() != 3) {
         throw std::runtime_error("rpy must be a 3-element list [roll, pitch, yaw]");
@@ -59,11 +73,17 @@ Eigen::Matrix3d rpy_to_matrix(const YAML::Node& node) {
     return (Rz * Ry * Rx).toRotationMatrix();
 }
 
+/**
+ * @brief Converts Eigen rotation matrix to Stonefish quaternion.
+ */
 sf::Quaternion to_quaternion(const Eigen::Matrix3d& R) {
     Eigen::Quaterniond q(R);
     return sf::Quaternion{q.x(), q.y(), q.z(), q.w()};
 }
 
+/**
+ * @brief Parses one trajectory keyframe and converts NED values to Stonefish ENU.
+ */
 sf::KeyPoint parse_keypoint(const YAML::Node& node) {
     if (!node["t"]) {
         throw std::runtime_error("keyframe is missing required field 't'");
@@ -92,6 +112,7 @@ sf::KeyPoint parse_keypoint(const YAML::Node& node) {
 }  // namespace
 
 trajectory::Spec trajectory::load_from_yaml(const std::string& path) {
+    // YAML parsing is intentionally strict so malformed trajectories fail early.
     const YAML::Node root = YAML::LoadFile(path);
 
     if (!root["keyframes"] || !root["keyframes"].IsSequence()) {

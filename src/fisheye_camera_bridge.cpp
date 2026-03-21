@@ -1,3 +1,8 @@
+/**
+ * @file fisheye_camera_bridge.cpp
+ * @brief Implements asynchronous frame capture and ROS publication for fisheye cameras.
+ */
+
 #include "tauv_sim/fisheye_camera_bridge.h"
 
 #include <sensor_msgs/image_encodings.hpp>
@@ -14,6 +19,9 @@ FisheyeCameraBridge::FisheyeCameraBridge(sf::FisheyeCamera* sensor,
     }
 }
 
+/**
+ * @brief Caches the latest Stonefish image buffer from callback context.
+ */
 void FisheyeCameraBridge::handle_frame(sf::FisheyeCamera* sensor) {
     if (sensor != sensor_) {
         return;
@@ -30,6 +38,9 @@ void FisheyeCameraBridge::handle_frame(sf::FisheyeCamera* sensor) {
     has_new_frame_ = true;
 }
 
+/**
+ * @brief Publishes the most recent buffered frame using simulation time.
+ */
 void FisheyeCameraBridge::on_step(const Context& ctx) {
     if (!pub_) {
         return;

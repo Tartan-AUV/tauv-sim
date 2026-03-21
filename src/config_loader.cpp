@@ -1,3 +1,8 @@
+/**
+ * @file config_loader.cpp
+ * @brief Implements typed ROS-parameter loading for tauv_sim configuration.
+ */
+
 #include "tauv_sim/config_loader.h"
 
 #include <Eigen/Dense>
@@ -8,6 +13,9 @@
 
 using namespace config;
 
+/**
+ * @brief Loads the initial world pose for the vehicle body.
+ */
 config::world::InitialPose ConfigLoader::get_initial_pose() {
     const auto ns = std::string{config::world::InitialPose::NS};
     auto world_T_body_initial = get_transform(ns, "world", "body_initial", false);
@@ -15,6 +23,9 @@ config::world::InitialPose ConfigLoader::get_initial_pose() {
     return {world_T_body_initial};
 }
 
+/**
+ * @brief Loads static frame transforms for Osprey sensors and body.
+ */
 osprey::Frames ConfigLoader::get_frames() {
     const auto ns = std::string{osprey::Frames::NS};
 
@@ -29,6 +40,9 @@ osprey::Frames ConfigLoader::get_frames() {
     return {cad_T_body, t_depth_B, cad_T_dvl, cad_T_imu0, cad_T_imu1, cad_T_cam0, cad_T_cam1};
 }
 
+/**
+ * @brief Loads inertial and buoyancy parameters for the Osprey hull.
+ */
 osprey::InertialBuoyancy ConfigLoader::get_inertial_buoyancy_params() {
     const auto ns = std::string{osprey::InertialBuoyancy::NS};
 
@@ -42,6 +56,9 @@ osprey::InertialBuoyancy ConfigLoader::get_inertial_buoyancy_params() {
     return c;
 }
 
+/**
+ * @brief Loads pressure/depth sensor simulation settings.
+ */
 osprey::sensors::Depth ConfigLoader::get_depth_params() {
     const auto ns = std::string{osprey::sensors::Depth::NS};
 
@@ -53,6 +70,9 @@ osprey::sensors::Depth ConfigLoader::get_depth_params() {
         update_rate,
     };
 }
+/**
+ * @brief Loads configuration for each simulated IMU instance.
+ */
 std::array<osprey::sensors::Imu, osprey::sensors::Imu::N_IMUS>
 ConfigLoader::get_imu_params() {
     const auto base_ns = std::string{osprey::sensors::Imu::NS};
@@ -79,6 +99,9 @@ ConfigLoader::get_imu_params() {
     return imus;
 }
 
+/**
+ * @brief Loads DVL noise, range, and update-rate parameters.
+ */
 osprey::sensors::Dvl ConfigLoader::get_dvl_params() {
     const auto ns = std::string{osprey::sensors::Dvl::NS};
 
@@ -93,6 +116,9 @@ osprey::sensors::Dvl ConfigLoader::get_dvl_params() {
             linear_velocity_range};
 }
 
+/**
+ * @brief Loads fisheye camera rendering and publication configuration.
+ */
 std::array<osprey::sensors::FisheyeCamera, osprey::sensors::FisheyeCamera::N_CAMERAS>
 ConfigLoader::get_fisheye_cameras() {
     const auto base_ns = std::string{osprey::sensors::FisheyeCamera::NS};
@@ -133,6 +159,9 @@ ConfigLoader::get_fisheye_cameras() {
     return cameras;
 }
 
+/**
+ * @brief Loads thruster dynamics and geometry configuration.
+ */
 osprey::actuators::Thrusters ConfigLoader::get_thrusters() {
     const auto ns = std::string{osprey::actuators::Thrusters::NS};
     const auto n_thrusters = osprey::actuators::Thrusters::N_THRUSTERS;
@@ -172,6 +201,9 @@ osprey::actuators::Thrusters ConfigLoader::get_thrusters() {
     return t;
 }
 
+/**
+ * @brief Builds rotation and translation parameter keys for a named transform.
+ */
 std::pair<std::string, std::string> ConfigLoader::get_transform_name(const std::string& ns,
                                                                      const std::string& to,
                                                                      const std::string& from,
@@ -184,6 +216,9 @@ std::pair<std::string, std::string> ConfigLoader::get_transform_name(const std::
     return {rotation_name, translation_name};
 }
 
+/**
+ * @brief Loads a transform from parameterized rotation and translation fields.
+ */
 sf::Transform ConfigLoader::get_transform(const std::string& ns,
                                           const std::string& to,
                                           const std::string& from,
@@ -225,6 +260,9 @@ sf::Transform ConfigLoader::get_transform(const std::string& ns,
     return sf::Transform{sf::Quaternion{q.x(), q.y(), q.z(), q.w()}, t};
 }
 
+/**
+ * @brief Loads an unbounded vector parameter.
+ */
 std::vector<double> ConfigLoader::get_vector(const std::string& ns, const std::string& name) {
     assert(std::isalnum(ns.back()));
 
@@ -240,6 +278,9 @@ std::vector<double> ConfigLoader::get_vector(const std::string& ns, const std::s
     return v;
 }
 
+/**
+ * @brief Loads a fixed-size array parameter and validates dimension.
+ */
 template <typename T, size_t N>
 std::array<T, N> ConfigLoader::get_array(const std::string& ns, const std::string& name) {
     assert(std::isalnum(ns.back()));
@@ -263,6 +304,9 @@ std::array<T, N> ConfigLoader::get_array(const std::string& ns, const std::strin
     return a;
 }
 
+/**
+ * @brief Loads a 3x3 matrix parameter from a flattened 9-element array.
+ */
 sf::Matrix3 ConfigLoader::get_matrix3(const std::string& ns, const std::string& name) {
     auto a = get_array<double, 9>(ns, name);
     auto m = sf::Matrix3{
@@ -279,12 +323,18 @@ sf::Matrix3 ConfigLoader::get_matrix3(const std::string& ns, const std::string& 
     return m;
 }
 
+/**
+ * @brief Loads a 3-vector parameter.
+ */
 sf::Vector3 ConfigLoader::get_vector3(const std::string& ns, const std::string& name) {
     auto a = get_array<double, 3>(ns, name);
     auto v = sf::Vector3{a[0], a[1], a[2]};
     return v;
 }
 
+/**
+ * @brief Loads a scalar parameter by key.
+ */
 template <typename T>
 T ConfigLoader::get_scalar(const std::string& ns, const std::string& name) {
     assert(std::isalnum(ns.back()));

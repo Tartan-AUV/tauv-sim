@@ -1,3 +1,8 @@
+/**
+ * @file imu_bridge.h
+ * @brief Declares the bridge that publishes Stonefish IMU data as ROS IMU messages.
+ */
+
 #pragma once
 
 #include <sensors/scalar/IMU.h>
@@ -10,13 +15,22 @@
 #include "tauv_sim/config.h"
 #include "tauv_sim/context.h"
 
+/**
+ * @brief Converts Stonefish IMU orientation and motion data into ROS conventions.
+ */
 class ImuBridge {
    public:
+    /**
+     * @brief Constructs an IMU bridge for one simulated IMU sensor.
+     */
     ImuBridge(sf::IMU* sensor,
               rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub,
               std::string frame_id,
               const config::osprey::sensors::Imu& cfg);
 
+    /**
+     * @brief Publishes an IMU message when the sensor produced a new sample.
+     */
     void on_step(const Context& ctx);
 
    private:

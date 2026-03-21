@@ -1,3 +1,8 @@
+/**
+ * @file thruster_bridge.cpp
+ * @brief Implements ROS command/telemetry bridging for simulated thrusters.
+ */
+
 #include "tauv_sim/thruster_bridge.h"
 
 constexpr double RADPS_TO_RPM = 60.0 / (2.0 * M_PI);
@@ -13,6 +18,9 @@ ThrusterBridge::ThrusterBridge(sf::Thruster* thruster,
       thruster_esc_id_(thruster_esc_id),
     c_(cfg){}
 
+/**
+ * @brief Applies one thrust command to the Stonefish thruster model.
+ */
 void ThrusterBridge::callback(tauv_msgs::msg::ThrusterSetpoint msg) {
     double throttle = msg.armed ? msg.thrust[thruster_esc_id_] : 0.0;
 
@@ -30,6 +38,9 @@ void ThrusterBridge::callback(tauv_msgs::msg::ThrusterSetpoint msg) {
     thruster_->setSetpoint(omega);
 }
 
+/**
+ * @brief Publishes simulated ESC telemetry at the configured period.
+ */
 void ThrusterBridge::on_step(const Context& ctx) {
     using namespace std::chrono_literals;
     if (ctx.sim_time_ - prev_pub_time_ >= period_ns_) {

@@ -1,3 +1,8 @@
+/**
+ * @file kinematic_osprey.cpp
+ * @brief Implements kinematic Osprey construction and trajectory playback wiring.
+ */
+
 #include "tauv_sim/kinematic_osprey.h"
 
 #undef Max  // stonefish opengl Max conflicts with ROS
@@ -40,6 +45,9 @@ KinematicOsprey::KinematicOsprey(std::string prefix,
                                                enable_cameras);
 }
 
+/**
+ * @brief Registers the animated body and sensors with Stonefish.
+ */
 void KinematicOsprey::add_to_simulation(sf::SimulationManager* sim_manager) {
     if (animated_body_) {
         sim_manager->AddAnimatedEntity(animated_body_.get());
@@ -54,6 +62,9 @@ void KinematicOsprey::on_step(const Context& ctx) { sensors_->on_step(ctx); }
 
 sf::AnimatedEntity* KinematicOsprey::get_entity() { return animated_body_.get(); }
 
+/**
+ * @brief Builds and initializes the Stonefish piecewise-linear trajectory.
+ */
 void KinematicOsprey::build_trajectory(const trajectory::Spec& spec) {
     if (!trajectory_) {
         return;

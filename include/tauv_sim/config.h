@@ -1,3 +1,8 @@
+/**
+ * @file config.h
+ * @brief Defines the typed runtime configuration schema consumed by tauv_sim.
+ */
+
 #pragma once
 
 #include <StonefishCommon.h>
@@ -10,6 +15,9 @@ namespace config {
 
 namespace world {
 
+/**
+ * @brief Initial world pose for the simulated vehicle body.
+ */
 struct InitialPose {
     static constexpr std::string_view NS = "world_T_body_initial";
 
@@ -20,6 +28,9 @@ struct InitialPose {
 
 namespace osprey {
 
+/**
+ * @brief Static frame transforms used to attach sensors and actuators to Osprey.
+ */
 struct Frames {
     static constexpr std::string_view NS = "osprey.frames";
 
@@ -42,6 +53,9 @@ struct Frames {
     sf::Transform cad_T_cam1;
 };
 
+/**
+ * @brief Mass, volume, and rigid-body inertial parameters for the Osprey hull.
+ */
 struct InertialBuoyancy {
     static constexpr std::string_view NS = "osprey.inertial_buoyancy";
 
@@ -63,6 +77,9 @@ struct InertialBuoyancy {
 
 namespace sensors {
 
+/**
+ * @brief Depth sensor noise and update-rate configuration.
+ */
 struct Depth {
     static constexpr std::string_view NS = "osprey.sensors.depth";
 
@@ -70,6 +87,9 @@ struct Depth {
     double update_rate;
 };
 
+/**
+ * @brief IMU noise, range, and update-rate configuration.
+ */
 struct Imu {
     static constexpr std::string_view NS = "osprey.sensors.imus";
     static constexpr size_t N_IMUS = 2;
@@ -83,6 +103,9 @@ struct Imu {
     sf::Vector3 linear_acceleration_range;
 };
 
+/**
+ * @brief DVL noise, velocity-range, and update-rate configuration.
+ */
 struct Dvl {
     static constexpr std::string_view NS = "osprey.sensors.dvl";
 
@@ -92,6 +115,9 @@ struct Dvl {
     sf::Vector3 linear_velocity_range;
 };
 
+/**
+ * @brief Fisheye camera rendering and publication configuration.
+ */
 struct FisheyeCamera {
     static constexpr std::string_view NS = "osprey.sensors.cameras";
     static constexpr size_t N_CAMERAS = 2;

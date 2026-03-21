@@ -1,3 +1,5 @@
+"""Launches kinematic tauv_sim with robot_localization EKF and optional rosbag recording."""
+
 from datetime import datetime
 from pathlib import Path
 
@@ -10,6 +12,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    """Builds a launch description for state-estimator integration testing in simulation."""
     sim_share_dir = Path(get_package_share_directory("tauv_sim"))
     sim_param_file = sim_share_dir / "config" / "params.yaml"
     trajectory_file = sim_share_dir / "config" / "trajectories" / "osprey_square.yaml"
@@ -17,7 +20,7 @@ def generate_launch_description():
     common_share_dir = Path(get_package_share_directory("tauv_core"))
     common_ekf_file = common_share_dir / "config" / "ekfFUNNY.yaml"
 
-    # Timestamped bag name
+    # Create a timestamped bag output path so each run has isolated recordings.
     timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M.%S')
     bag_name = f"sim_{timestamp}"
     bag_name_latest = "latest"
