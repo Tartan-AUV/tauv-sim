@@ -25,6 +25,8 @@ class ThrusterBridge {
 
     void callback(tauv_msgs::msg::ThrusterSetpoint msg);
 
+    void set_speed(float rad_per_sec);
+
    private:
     sf::Thruster* thruster_;
     rclcpp::Publisher<tauv_msgs::msg::EscTelemetry>::SharedPtr pub_;

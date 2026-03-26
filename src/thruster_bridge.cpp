@@ -47,3 +47,8 @@ void ThrusterBridge::on_step(const Context& ctx) {
         pub_->publish(msg);
     }
 }
+
+//added this
+void ThrusterBridge::set_speed(float rad_per_sec) {
+    thruster_->setSetpoint(rad_per_sec);
+}

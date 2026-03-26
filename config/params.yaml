@@ -94,6 +94,8 @@
                     deadband_low: -33.0
                     deadband_high: 33.0
                     J_msp: 0.0
+                    kd_1 : 1
+                    kd_2 : 2
                     K_v1: 0.02473
                     K_v2: 5.14e-05
                     K_t: 1.0
@@ -102,7 +104,7 @@
                     K_F_rev: 0.0002963
                     telemetry_rate: 50.0
                     # Right-handed thrusters: FLH, FRH, BLV, FRV
-                    right_handed: [1, 0, 1, 0, 0, 0, 1, 1]
+                    right_handed: [1, 1, 0, 0, 0, 1, 0, 1]
                     esc_thruster_ids: [0, 1, 2, 3, 4, 5, 6, 7]
 
                     t_cad__thruster_0: [-0.215, 0.237, 0.079]
