@@ -31,7 +31,7 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
 {
     // single subscriber for all the 8 forces
     //TODO
-    auto forces_topic_name = prefix + "/actuators/thrusters/thruster_forces"; // Adjust topic name as needed
+    auto forces_topic_name = prefix + "/actuators/thrusters/thruster_rpms"; // Adjust topic name as needed
 
     forces_sub_ = node->create_subscription<tauv_msgs::msg::ThrusterSetpoint>(
         forces_topic_name,
@@ -158,11 +158,10 @@ void OspreyThrusters::ThrusterCallback(const tauv_msgs::msg::ThrusterSetpoint::S
 
     for (size_t i = 0; i < actuators::Thrusters::N_THRUSTERS; ++i) {
         // TODO it should be somethign else
-        float force = msg->thrust[i];
         // should be getting rpm
         //linear interpolation
         // TODO: convert force to rpm
-        float rpm = force;
+        float rpm = msg->thrust[i];
 
         float rad_per_sec = rpm * (2.0f * M_PI / 60.0f);
 
