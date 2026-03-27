@@ -13,23 +13,6 @@ ThrusterBridge::ThrusterBridge(sf::Thruster* thruster,
       thruster_esc_id_(thruster_esc_id),
     c_(cfg){}
 
-// This is outdated
-void ThrusterBridge::callback(tauv_msgs::msg::ThrusterSetpoint msg) {
-    double throttle = msg.armed ? msg.thrust[thruster_esc_id_] : 0.0;
-
-    assert(c_.K_t == 1.0);
-    assert(c_.R_m == 1.0);
-    assert(c_.J_msp == 0.0);
-
-    // TODO: Ideally we should be using rotor inertia and the full Bessa model
-    double V_eff = c_.v_bat * std::abs(throttle);
-    double omega = (-c_.K_v1 + std::sqrt(c_.K_v1 * c_.K_v1 + 4.0 * c_.K_v2 * V_eff)) / (2.0 * c_.K_v2);
-
-    if (throttle < 0.0)
-        omega *= -1.0;
-
-    thruster_->setSetpoint(omega);
-}
 
 void ThrusterBridge::on_step(const Context& ctx) {
     using namespace std::chrono_literals;
@@ -39,11 +22,12 @@ void ThrusterBridge::on_step(const Context& ctx) {
         msg.header.frame_id = "thruster_" + std::to_string(thruster_esc_id_);
         msg.header.stamp = ctx.get_ros_time();
         msg.id = thruster_esc_id_;
-        msg.rpm = thruster_->getOmega() * RADPS_TO_RPM;
+        msg.rpm = thruster_->getOmega();
         msg.voltage = 0.0;
         msg.current = 0.0;
         msg.temperature = 0.0;
         msg.fault_code = 0U;
+        std::cout << "Thruster: " << static_cast<int>(thruster_esc_id_) << ", RPM: " << thruster_->getOmega() << ", Thrust: " << thruster_->getThrust() << ", Setpoint: " << thruster_->getSetpoint() << std::endl;
 
         pub_->publish(msg);
     }
@@ -51,5 +35,6 @@ void ThrusterBridge::on_step(const Context& ctx) {
 
 //added this
 void ThrusterBridge::set_speed(float rad_per_sec) {
+    std::cout << "Setting thruster " << static_cast<int>(thruster_esc_id_) << " speed to " << rad_per_sec << " rad/s" << std::endl;
     thruster_->setSetpoint(rad_per_sec);
 }

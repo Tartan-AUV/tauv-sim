@@ -45,11 +45,12 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
 
     // physics
     auto prop_physics = sf::PhysicsSettings{};
-    prop_physics.mode = sf::PhysicsMode::DISABLED;
-    prop_physics.estimateHydrodynamics = false;
+    prop_physics.mode = sf::PhysicsMode::SUBMERGED;
+    // prop_physics.estimateHydrodynamics = true;
 
     //rotor and thruster model
-    auto rotor_dynamics = std::make_shared<sf::FirstOrder>(thruster_config_.tau); //TODO time constant
+    // auto rotor_dynamics = std::make_shared<sf::FirstOrder>(thruster_config_.tau); //TODO time constant
+    auto rotor_dynamics = std::make_shared<sf::ZeroOrder>();
 
     // Setting up the interpolated thrust
     std::vector<sf::Scalar> thrust_in;
@@ -80,15 +81,15 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
             columns.push_back(token);
         }
 
-        // Check if the row has all 7 columns to avoid out-of-bounds crashes
-        if (columns.size() >= 7) {
+        // Check if the row has all 3 columns to avoid out-of-bounds crashes
+        if (columns.size() >= 3) {
             try {
                 // Grab Column 1 (RPM) and convert to rad/s
-                float rpm = std::stof(columns[1]);
+                float rpm = std::stof(columns[0]);
                 float rad_per_sec = rpm * (2.0f * M_PI / 60.0f);
 
                 // Grab Column 5 (Force in Kg f) and convert to Newtons
-                float force_kgf = std::stof(columns[5]);
+                float force_kgf = std::stof(columns[1]);
                 float force_n = force_kgf * 9.80665f;
 
                 thrust_in.push_back(rad_per_sec);
@@ -103,6 +104,8 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
 
     // Create the model using the populated and converted vectors
     auto thrust_model = std::make_shared<sf::InterpolatedThrust>(thrust_in, thrust_out);
+    std::cout << thrust_model->Update(0.0f).first << " N" << std::endl;
+
     // blue robotics data
     //linear interpleration model is
     // in is thrust out is force // put it in assets
@@ -124,9 +127,9 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
                                          thrust_model,
                                          0.1F,
                                          thruster_config_.right_handed[i],
-                                         16.0F, // Hardcoded constant voltage of 16V instead of v_bat
+                                         370, // Max radians/second
                                          false,
-                                         true);  // normalized
+                                         false);  // normalized
 
         auto body_T_thruster = body_T_cad * thruster_config_.cad_T_thrusters[i];
         sf_robot->AddLinkActuator(thruster, links::OSPREY_BASE, body_T_thruster); // Fixed sf_robot typo
@@ -146,6 +149,7 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
                                              thruster_config_.telemetry_rate,
                                              thruster_config_.esc_thruster_ids[i],
                                              thruster_config_);
+        thruster_bridges_[i]->set_speed(0.0f); // Initialize thrusters to 0 speed
     }
     // build the 8 thruster to their bridge
 }

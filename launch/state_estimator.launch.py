@@ -39,7 +39,7 @@ def generate_launch_description():
                 executable="tauv_sim",
                 name="tauv_sim",
                 parameters=[str(sim_param_file)],
-                arguments=["--kinematic", str(trajectory_file)],
+                # arguments=["--kinematic", str(trajectory_file)],
                 output="screen",
             ),
             TimerAction(
