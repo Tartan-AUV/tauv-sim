@@ -94,8 +94,7 @@
                     deadband_low: -33.0
                     deadband_high: 33.0
                     J_msp: 0.0
-                    kd_1 : 1
-                    kd_2 : 2
+                    tau : 0.1
                     K_v1: 0.02473
                     K_v2: 5.14e-05
                     K_t: 1.0

@@ -166,6 +166,9 @@ struct Thrusters {
     // Reverse thrust coefficeint [N / (rad/s)^2]
     double K_F_rev;
 
+    // For the first order model
+    double tau;
+
     // Right-handedness
     std::array<bool, N_THRUSTERS> right_handed;
 

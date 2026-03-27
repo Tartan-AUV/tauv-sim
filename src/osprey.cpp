@@ -77,7 +77,7 @@ Osprey::Osprey(const std::string prefix,
     thruster_config_ = config_loader->get_thrusters();
 
     // make the osprey thrusters
-    thruster_controller_ = std::make_unique<ThrusterController>(
+    thruster_controller_ = std::make_unique<OspreyThrusters>(
         prefix_,
         assets_path,
         node,

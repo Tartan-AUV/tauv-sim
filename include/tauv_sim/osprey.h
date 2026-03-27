@@ -40,7 +40,7 @@ class Osprey {
 
     sf::FeatherstoneRobot* sf_robot_;
     std::unique_ptr<OspreySensors> sensors_;
-    std::unique_ptr<ThrusterController> thruster_controller_;
+    std::unique_ptr<OspreyThrusters> thruster_controller_;
 
     std::array<std::unique_ptr<ThrusterBridge>, 8> thruster_bridges_;
     std::array<std::shared_ptr<rclcpp::Subscription<tauv_msgs::msg::ThrusterSetpoint>>, 8>

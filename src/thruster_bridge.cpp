@@ -13,6 +13,7 @@ ThrusterBridge::ThrusterBridge(sf::Thruster* thruster,
       thruster_esc_id_(thruster_esc_id),
     c_(cfg){}
 
+// This is outdated
 void ThrusterBridge::callback(tauv_msgs::msg::ThrusterSetpoint msg) {
     double throttle = msg.armed ? msg.thrust[thruster_esc_id_] : 0.0;
 

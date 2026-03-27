@@ -13,10 +13,10 @@
 #include "tauv_msgs/msg/thruster_setpoint.hpp"
 
 
-class ThrusterController {
+class OspreyThrusters {
 
     public:
-        ThrusterController(const std::string& prefix,
+        OspreyThrusters(const std::string& prefix,
                         const std::string& assets_path,
                         rclcpp::Node::SharedPtr node,
                         sf::FeatherstoneRobot* sf_robot,
@@ -29,8 +29,7 @@ class ThrusterController {
         rclcpp::Subscription<tauv_msgs::msg::ThrusterSetpoint>::SharedPtr forces_sub_;
         std::array<std::unique_ptr<ThrusterBridge>, 8> thruster_bridges_;
 
-        // Might need to keep a reference to the config or node if used later in the callback
         config::osprey::actuators::Thrusters thruster_config_; // TODO
 
-        void callback(const tauv_msgs::msg::ThrusterSetpoint::SharedPtr msg);
+        void ThrusterCallback(const tauv_msgs::msg::ThrusterSetpoint::SharedPtr msg);
 };

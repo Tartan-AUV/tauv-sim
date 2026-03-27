@@ -145,6 +145,7 @@ osprey::actuators::Thrusters ConfigLoader::get_thrusters() {
     t.J_msp = get_scalar<double>(ns, "J_msp");
     t.K_v1 = get_scalar<double>(ns, "K_v1");
     t.K_v2 = get_scalar<double>(ns, "K_v2");
+    t.tau = get_scalar<double>(ns, "tau");
     t.K_t = get_scalar<double>(ns, "K_t");
     t.R_m = get_scalar<double>(ns, "R_m");
     t.K_F_fwd = get_scalar<double>(ns, "K_F_fwd");
