@@ -27,7 +27,6 @@ void ThrusterBridge::on_step(const Context& ctx) {
         msg.current = 0.0;
         msg.temperature = 0.0;
         msg.fault_code = 0U;
-        std::cout << "Thruster: " << static_cast<int>(thruster_esc_id_) << ", RPM: " << thruster_->getOmega() << ", Thrust: " << thruster_->getThrust() << ", Setpoint: " << thruster_->getSetpoint() << std::endl;
 
         pub_->publish(msg);
     }

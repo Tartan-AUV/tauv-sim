@@ -48,10 +48,6 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
     prop_physics.mode = sf::PhysicsMode::SUBMERGED;
     // prop_physics.estimateHydrodynamics = true;
 
-    //rotor and thruster model
-    // auto rotor_dynamics = std::make_shared<sf::FirstOrder>(thruster_config_.tau); //TODO time constant
-    auto rotor_dynamics = std::make_shared<sf::ZeroOrder>();
-
     // Setting up the interpolated thrust
     std::vector<sf::Scalar> thrust_in;
     std::vector<sf::Scalar> thrust_out;
@@ -69,6 +65,9 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
     std::string line;
     // Read and discard the header row so we don't try to parse words as numbers
     std::getline(file, line);
+
+    // The way the rotor and thruster models work, each thruster requires its own rotor model,
+    // but they can all share the same thrust model.
 
     // Parse the CSV line by line
     while (std::getline(file, line)) {
@@ -113,6 +112,10 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
 
     //builds the 8 thruster bridges
     for (size_t i = 0; i < actuators::Thrusters::N_THRUSTERS; ++i) {
+        //rotor and thruster model
+        auto rotor_dynamics = std::make_shared<sf::FirstOrder>(thruster_config_.tau);
+        // auto rotor_dynamics = std::make_shared<sf::ZeroOrder>();
+
         auto prop = std::make_shared<sf::Polyhedron>("thruster_prop_" + std::to_string(i),
                                                      prop_physics,
                                                      assets_path + "/osprey/t200_cw_prop.obj",
