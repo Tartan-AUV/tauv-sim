@@ -48,10 +48,10 @@ OspreySensors::OspreySensors(std::string prefix,
 
     const auto dvl_params = config_loader_->get_dvl_params();
     dvl_sensor_ = std::make_unique<sf::DVL>("dvl",
-                                            7,
-                                            false,
-                                            dvl_params.update_rate);  // Stonefish uses NED so I
-                                                                      // think true is correct?
+                                            50,
+                                            true,
+                                            dvl_params.update_rate);
+
     dvl_sensor_->setRange(dvl_params.linear_velocity_range, 0.01, 10);
     dvl_sensor_->setNoise(dvl_params.linear_velocity_percent_noise,
                           dvl_params.linear_velocity_stddev_noise,

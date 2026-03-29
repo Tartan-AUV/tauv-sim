@@ -31,7 +31,7 @@ void DvlBridge::on_step(const Context& ctx) {
     }
 
     if (sensor_->getLastValue(7) == 3) {  // No ping at all
-        // std::cout << "DVL: No ping available, skipping publish." << std::endl;
+        std::cout << "DVL: No ping available, skipping publish." << std::endl;
         return;
     }
 
