@@ -139,17 +139,7 @@ osprey::actuators::Thrusters ConfigLoader::get_thrusters() {
 
     osprey::actuators::Thrusters t;
 
-    t.v_bat = get_scalar<double>(ns, "v_bat");
-    t.deadband_low = get_scalar<double>(ns, "deadband_low");
-    t.deadband_high = get_scalar<double>(ns, "deadband_high");
-    t.J_msp = get_scalar<double>(ns, "J_msp");
-    t.K_v1 = get_scalar<double>(ns, "K_v1");
-    t.K_v2 = get_scalar<double>(ns, "K_v2");
     t.tau = get_scalar<double>(ns, "tau");
-    t.K_t = get_scalar<double>(ns, "K_t");
-    t.R_m = get_scalar<double>(ns, "R_m");
-    t.K_F_fwd = get_scalar<double>(ns, "K_F_fwd");
-    t.K_F_rev = get_scalar<double>(ns, "K_F_rev");
     t.telemetry_rate = get_scalar<double>(ns, "telemetry_rate");
 
     auto right_handed_int = get_array<long, n_thrusters>(ns, "right_handed");

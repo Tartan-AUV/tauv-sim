@@ -105,11 +105,6 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
     auto thrust_model = std::make_shared<sf::InterpolatedThrust>(thrust_in, thrust_out);
     std::cout << thrust_model->Update(0.0f).first << " N" << std::endl;
 
-    // blue robotics data
-    //linear interpleration model is
-    // in is thrust out is force // put it in assets
-
-
     //builds the 8 thruster bridges
     for (size_t i = 0; i < actuators::Thrusters::N_THRUSTERS; ++i) {
         //rotor and thruster model
@@ -128,23 +123,19 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
                                          prop,
                                          rotor_dynamics,
                                          thrust_model,
-                                         0.1F,
+                                         0.076,
                                          thruster_config_.right_handed[i],
                                          370, // Max radians/second
                                          false,
                                          false);  // normalized
 
         auto body_T_thruster = body_T_cad * thruster_config_.cad_T_thrusters[i];
-        sf_robot->AddLinkActuator(thruster, links::OSPREY_BASE, body_T_thruster); // Fixed sf_robot typo
+        sf_robot->AddLinkActuator(thruster, links::OSPREY_BASE, body_T_thruster);
 
         // Telemetry topic (still individual per thruster)
-        auto telemetry_topic_name = prefix + "/actuators/thruster_" + std::to_string(i) + "/telemetry"; // Fixed prefix typo
+        auto telemetry_topic_name = prefix + "/actuators/thruster_" + std::to_string(i) + "/telemetry";
 
         auto pub = node->create_publisher<tauv_msgs::msg::EscTelemetry>(telemetry_topic_name, 10);
-
-        // Create the bridge and store it in the array
-        //make a thrustersetpoint message?
-
 
         thruster_bridges_[i] =
             std::make_unique<ThrusterBridge>(thruster,
@@ -154,25 +145,15 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
                                              thruster_config_);
         thruster_bridges_[i]->set_speed(0.0f); // Initialize thrusters to 0 speed
     }
-    // build the 8 thruster to their bridge
 }
 
 
 void OspreyThrusters::ThrusterCallback(const tauv_msgs::msg::ThrusterSetpoint::SharedPtr msg)
 {
-    // loop through all the forces
     //TODO: add something for armed
-
     for (size_t i = 0; i < actuators::Thrusters::N_THRUSTERS; ++i) {
-        // TODO it should be somethign else
-        // should be getting rpm
-        //linear interpolation
-        // TODO: convert force to rpm
         float rpm = msg->thrust[i];
-
         float rad_per_sec = rpm * (2.0f * M_PI / 60.0f);
-
-
         if (thruster_bridges_[i]) {
             thruster_bridges_[i]->set_speed(rad_per_sec);
         }
