@@ -29,12 +29,8 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
                                        //%ODO also config_loader.cpp line 150
     : thruster_config_(thruster_config)
 {
-    // single subscriber for all the 8 forces
-    //TODO
-    auto forces_topic_name = prefix + "/actuators/thrusters/thruster_rpms"; // Adjust topic name as needed
-
     forces_sub_ = node->create_subscription<tauv_msgs::msg::ThrusterSetpoint>(
-        forces_topic_name,
+        "/thruster_rpms",
         10,
         // Bind the callback
         [this](const tauv_msgs::msg::ThrusterSetpoint::SharedPtr msg)
@@ -45,7 +41,7 @@ OspreyThrusters::OspreyThrusters(const std::string& prefix,
 
     // physics
     auto prop_physics = sf::PhysicsSettings{};
-    prop_physics.mode = sf::PhysicsMode::SUBMERGED;
+    prop_physics.mode = sf::PhysicsMode::DISABLED;
     // prop_physics.estimateHydrodynamics = true;
 
     // Setting up the interpolated thrust

@@ -34,6 +34,5 @@ void ThrusterBridge::on_step(const Context& ctx) {
 
 //added this
 void ThrusterBridge::set_speed(float rad_per_sec) {
-    std::cout << "Setting thruster " << static_cast<int>(thruster_esc_id_) << " speed to " << rad_per_sec << " rad/s" << std::endl;
     thruster_->setSetpoint(rad_per_sec);
 }

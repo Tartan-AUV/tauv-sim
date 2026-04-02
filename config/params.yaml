@@ -13,8 +13,8 @@
                 cad_R_body: [0.0, 1.0, 0.0,
                             1.0, 0.0, 0.0,
                             0.0, 0.0, -1.0]
-                t_depth_B: [0.064, -0.2, 0.08]
-                t_cad__dvl: [0.0, -0.141, -0.02]
+                t_depth_B: [-0.2, 0.064, -0.08]  # NED ??
+                t_cad__dvl: [0.0, -0.141, -0.02] # RFU??
                 cad_R_dvl: [0.0, 1.0, 0.0,
                             1.0, 0.0, 0.0,
                             0.0, 0.0, -1.0]
@@ -37,9 +37,9 @@
 
             inertial_buoyancy:
                 mass: 22.3
-                volume: 0.04
-                t_hull_com_C: [0.0, 0.0, -0.076]
-                t_hull_cob_C: [0.0, 0.0, -0.015]
+                volume: 0.025
+                t_hull_com_C: [0.0, 0.035, -0.05]
+                t_hull_cob_C: [0.0, 0.035, -0.076]
                 hull_inertia_COM_C: [10.0, 0.0, 0.0,
                                     0.0, 10.0, 0.0,
                                     0.0, 0.0, 10.0]
@@ -94,7 +94,7 @@
                     telemetry_rate: 50.0
 
                     # Right-handed thrusters: BRH, BLH, FLV, BRV
-                    right_handed: [0, 1, 1, 0, 1, 1, 0, 0]
+                    right_handed: [0, 0, 1, 1, 0, 1, 1, 0]
                     esc_thruster_ids: [0, 1, 2, 3, 4, 5, 6, 7]
 
                     # This is in RFU coords ???
@@ -102,22 +102,22 @@
                     rpy_cad__thruster_0: [0.0, 0.0, 135.0]
 
                     t_cad__thruster_1: [-0.212, 0.240, 0.079] # FLH
-                    rpy_cad__thruster_1: [0.0, 0.0, -135.0]
+                    rpy_cad__thruster_1: [0.0, 0.0, 45.0]
 
                     t_cad__thruster_2: [0.226, -0.226, 0.079] # BRH
                     rpy_cad__thruster_2: [0.0, 0.0, 45.0]
 
                     t_cad__thruster_3: [-0.226, -0.226, 0.079] # BLH
-                    rpy_cad__thruster_3: [0.0, 0.0, -45.0]
+                    rpy_cad__thruster_3: [0.0, 0.0, 135.0]
 
                     t_cad__thruster_4: [0.246, 0.094, -0.021] # FRV
                     rpy_cad__thruster_4: [0.0, -90.0, 0.0]
 
                     t_cad__thruster_5: [-0.246, 0.094, -0.021] # FLV
-                    rpy_cad__thruster_5: [0.0, -90.0, 0.0]
+                    rpy_cad__thruster_5: [0.0, 90.0, 0.0]
 
                     t_cad__thruster_6: [0.246, -0.094, -0.021] # BRV
                     rpy_cad__thruster_6: [0.0, 90.0, 0.0]
 
                     t_cad__thruster_7: [-0.246, -0.094, -0.021] # BLV
-                    rpy_cad__thruster_7: [0.0, 90.0, 0.0]
+                    rpy_cad__thruster_7: [0.0, -90.0, 0.0]

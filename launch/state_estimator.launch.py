@@ -101,5 +101,23 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': True}],
                 output='screen'
             ),
+            Node(
+                package='tauv_autonomy',
+                executable='controller',
+                name='controller',
+                output='screen',
+            ),
+            Node(
+                package='tauv_autonomy',
+                executable='thruster_forces',
+                name='thruster_forces',
+                output='screen',
+            ),
+            Node(
+                package='tauv_autonomy',
+                executable='thruster_rpms',
+                name='thruster_rpms',
+                output='screen',
+            )
         ]
     )
