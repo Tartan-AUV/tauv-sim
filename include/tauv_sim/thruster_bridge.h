@@ -23,7 +23,7 @@ class ThrusterBridge {
 
     void on_step(const Context& ctx);
 
-    void callback(tauv_msgs::msg::ThrusterSetpoint msg);
+    void set_speed(float rad_per_sec);
 
    private:
     sf::Thruster* thruster_;

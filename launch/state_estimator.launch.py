@@ -34,12 +34,15 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 'record', default_value='false', description='Enable rosbag recording'
             ),
+            DeclareLaunchArgument(
+                'tune', default_value='True', description='Enable autotuning'
+            ), 
             Node(
                 package="tauv_sim",
                 executable="tauv_sim",
                 name="tauv_sim",
                 parameters=[str(sim_param_file)],
-                arguments=["--kinematic", str(trajectory_file)],
+                # arguments=["--kinematic", str(trajectory_file)],
                 output="screen",
             ),
             TimerAction(
@@ -101,5 +104,26 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': True}],
                 output='screen'
             ),
+            Node(
+                package='tauv_autonomy',
+                executable='controller',
+                name='controller',
+                parameters=[{
+                    'tune': LaunchConfiguration('tune')
+                }],
+                output='screen',
+            ),
+            Node(
+                package='tauv_autonomy',
+                executable='thruster_forces',
+                name='thruster_forces',
+                output='screen',
+            ),
+            Node(
+                package='tauv_autonomy',
+                executable='thruster_rpms',
+                name='thruster_rpms',
+                output='screen',
+            )
         ]
     )

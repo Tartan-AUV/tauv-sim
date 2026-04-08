@@ -136,35 +136,8 @@ struct Thrusters {
 
     static constexpr size_t N_THRUSTERS = 8;
 
-    // Battery voltage (fixed for now)
-    double v_bat;
-
-    // Deadband low [rad / s]
-    double deadband_low;
-
-    // Deadband high [rad / s]
-    double deadband_high;
-
-    // Rotor inertia [kg * m^2]
-    double J_msp;
-
-    // Linear torque coefficient [Nm / (rad/s)]
-    double K_v1;
-
-    // Quadratic torque coefficient [Nm / (rad/s)]
-    double K_v2;
-
-    // Current-torque constant [Nm / A]
-    double K_t;
-
-    // Winding resistance [Ohm]
-    double R_m;
-
-    // Forward thrust coefficient [N / (rad/s)^2]
-    double K_F_fwd;
-
-    // Reverse thrust coefficeint [N / (rad/s)^2]
-    double K_F_rev;
+    // Time constant for rotor first order model
+    double tau;
 
     // Right-handedness
     std::array<bool, N_THRUSTERS> right_handed;
