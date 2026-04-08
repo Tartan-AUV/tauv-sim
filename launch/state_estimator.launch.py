@@ -34,6 +34,9 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 'record', default_value='false', description='Enable rosbag recording'
             ),
+            DeclareLaunchArgument(
+                'tune', default_value='True', description='Enable autotuning'
+            ), 
             Node(
                 package="tauv_sim",
                 executable="tauv_sim",
@@ -105,6 +108,9 @@ def generate_launch_description():
                 package='tauv_autonomy',
                 executable='controller',
                 name='controller',
+                parameters=[{
+                    'tune': LaunchConfiguration('tune')
+                }],
                 output='screen',
             ),
             Node(
