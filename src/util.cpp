@@ -51,7 +51,7 @@ sf::Matrix3 eigen_to_sf_matrix(const Eigen::Matrix3d& m) {
  */
 std::pair<sf::Transform, sf::Vector3> get_sf_inertia(const config::osprey::InertialBuoyancy& cfg,
                                                      const sf::Matrix3 body_R_cad) {
-    auto hull_inertia_COM_B_sf = body_R_cad * cfg.hull_inertia_COM_C;
+    auto hull_inertia_COM_B_sf = body_R_cad * cfg.hull_inertia_COM_C * body_R_cad.transpose();
     auto I_B = sf_to_eigen_matrix(hull_inertia_COM_B_sf);
 
     // Symmetrize

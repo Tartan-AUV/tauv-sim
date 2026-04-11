@@ -23,6 +23,7 @@
 #include "tauv_sim/context.h"
 #include "tauv_sim/osprey_sensors.h"
 #include "tauv_sim/thruster_bridge.h"
+#include "tauv_sim/osprey_thrusters.h"
 
 /**
  * @brief Owns the simulated Osprey robot, including sensors and thruster interfaces.
@@ -56,6 +57,7 @@ class Osprey {
 
     sf::FeatherstoneRobot* sf_robot_;
     std::unique_ptr<OspreySensors> sensors_;
+    std::unique_ptr<OspreyThrusters> thruster_controller_;
 
     std::array<std::unique_ptr<ThrusterBridge>, 8> thruster_bridges_;
     std::array<std::shared_ptr<rclcpp::Subscription<tauv_msgs::msg::ThrusterSetpoint>>, 8>

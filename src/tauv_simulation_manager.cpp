@@ -76,6 +76,9 @@ void TauvSimulationManager::BuildScenario() {
         robot_ =
             std::make_unique<Osprey>("os", assets_path, node_, config_loader_, enable_cameras_);
         auto world_T_body_initial = config_loader_->get_initial_pose().world_T_body_initial;
+        btVector3 origin = world_T_body_initial.getOrigin();
+        origin.setZ(origin.z() + 2);
+        world_T_body_initial.setOrigin(origin);
         AddRobot(robot_->get_stonefish_robot(), world_T_body_initial);
     }
 

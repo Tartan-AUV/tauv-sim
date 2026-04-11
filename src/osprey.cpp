@@ -19,6 +19,7 @@
 #include "tauv_sim/registry.h"
 #include "tauv_sim/util.h"
 
+
 using namespace config::osprey;
 
 Osprey::Osprey(const std::string prefix,
@@ -71,15 +72,24 @@ Osprey::Osprey(const std::string prefix,
                                                frames,
                                                body_T_cad,
                                                enable_cameras);
-    sensors_->attach_to_robot(sf_robot_);
+
+
+
+    sensors_->attach_to_robot(sf_robot_); //TODO: same thing but with thrusters
 
     /* Actuators */
     /** Thrusters **/
     thruster_config_ = config_loader->get_thrusters();
 
-    auto prop_physics = sf::PhysicsSettings{};
-    prop_physics.mode = sf::PhysicsMode::DISABLED;
-    prop_physics.estimateHydrodynamics = false;
+    // make the osprey thrusters
+    thruster_controller_ = std::make_unique<OspreyThrusters>(
+        prefix_,
+        assets_path,
+        node,
+        sf_robot_,
+        thruster_config_,
+        body_T_cad
+    );
 
     // TODO: should be using Bessa model, but we don't have rotor inertia rn
     // auto rotor_dynamics = std::make_shared<sf::Bessa>(thruster_config_.J_msp,
@@ -87,54 +97,9 @@ Osprey::Osprey(const std::string prefix,
     //                                                   thruster_config_.K_v2,
     //                                                   thruster_config_.K_t,
     //                                                   thruster_config_.R_m);
-    auto rotor_dynamics = std::make_shared<sf::ZeroOrder>();
 
-    auto thrust_model = std::make_shared<sf::DeadbandThrust>(thruster_config_.K_F_rev,
-                                                             thruster_config_.K_F_fwd,
-                                                             0.0F,
-                                                             0.0F);
 
-    for (size_t i = 0; i < actuators::Thrusters::N_THRUSTERS; ++i) {
-        auto prop = std::make_shared<sf::Polyhedron>("thruster_prop_" + std::to_string(i),
-                                                     prop_physics,
-                                                     assets_path + "/osprey/t200_cw_prop.obj",
-                                                     1.0F,
-                                                     sf::I4(),
-                                                     materials::PLASTIC.name,
-                                                     looks::OSPREY_BLUE_PROP.name);
 
-        auto thruster = new sf::Thruster{"thruster" + std::to_string(i),
-                                         prop,
-                                         rotor_dynamics,
-                                         thrust_model,
-                                         0.1F,
-                                         thruster_config_.right_handed[i],
-                                         thruster_config_.v_bat,
-                                         false,
-                                         true};
-
-        auto body_T_thruster = body_T_cad * thruster_config_.cad_T_thrusters[i];
-        sf_robot_->AddLinkActuator(thruster, links::OSPREY_BASE, body_T_thruster);
-
-        auto setpoint_topic_name =
-            prefix_ + "/actuators/thruster_" + std::to_string(i) + "/setpoint";
-        auto telemetry_topic_name =
-            prefix_ + "/actuators/thruster_" + std::to_string(i) + "/telemetry";
-
-        auto pub = node->create_publisher<tauv_msgs::msg::EscTelemetry>(telemetry_topic_name, 10);
-        thruster_bridges_[i] =
-            std::make_unique<ThrusterBridge>(thruster,
-                                             pub,
-                                             thruster_config_.telemetry_rate,
-                                             thruster_config_.esc_thruster_ids[i],
-                                             thruster_config_);
-
-        thruster_setpoint_subs_[i] = node->create_subscription<
-            tauv_msgs::msg::ThrusterSetpoint>(setpoint_topic_name,
-                                              10,
-                                              [this, i](tauv_msgs::msg::ThrusterSetpoint msg)
-                                                  -> void { thruster_bridges_[i]->callback(msg); });
-    };
 }
 
 /**
@@ -142,10 +107,9 @@ Osprey::Osprey(const std::string prefix,
  */
 void Osprey::on_step(const Context& ctx) {
     sensors_->on_step(ctx);
-    for (auto& bridge : thruster_bridges_) {
-        if (bridge) {
-            bridge->on_step(ctx);
-        }
+
+    if (thruster_controller_) {
+        thruster_controller_->on_step(ctx);
     }
 }
 
