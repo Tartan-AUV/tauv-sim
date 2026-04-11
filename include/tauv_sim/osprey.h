@@ -1,3 +1,8 @@
+/**
+ * @file osprey.h
+ * @brief Declares the dynamic Stonefish model for the Osprey vehicle.
+ */
+
 #pragma once
 
 #include <core/FeatherstoneRobot.h>
@@ -20,8 +25,14 @@
 #include "tauv_sim/thruster_bridge.h"
 #include "tauv_sim/osprey_thrusters.h"
 
+/**
+ * @brief Owns the simulated Osprey robot, including sensors and thruster interfaces.
+ */
 class Osprey {
    public:
+    /**
+     * @brief Builds the Stonefish Osprey model and wires ROS actuator/sensor bridges.
+     */
     Osprey(const std::string prefix,
            const std::string& assets_path,
            rclcpp::Node::SharedPtr node,
@@ -29,8 +40,14 @@ class Osprey {
            bool enable_cameras = true);
     ~Osprey() = default;
 
+    /**
+     * @brief Returns the Stonefish robot object to register in the scenario.
+     */
     sf::FeatherstoneRobot* get_stonefish_robot();
 
+    /**
+     * @brief Runs per-step sensor publication and actuator telemetry updates.
+     */
     void on_step(const Context& ctx);
 
    private:

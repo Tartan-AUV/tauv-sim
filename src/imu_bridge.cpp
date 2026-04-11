@@ -1,10 +1,19 @@
+/**
+ * @file imu_bridge.cpp
+ * @brief Implements conversion of Stonefish IMU data into ROS IMU messages.
+ */
+
 #include "tauv_sim/imu_bridge.h"
 
 #include <Eigen/Geometry>
 #include <algorithm>
+#include <cmath>
 
 namespace {
 
+/**
+ * @brief Builds a 3x3 diagonal covariance matrix from axis-wise standard deviations.
+ */
 std::array<double, 9> diagonal_from_stddev(const sf::Vector3& stddev) {
     const double sx = static_cast<double>(stddev.x());
     const double sy = static_cast<double>(stddev.y());
@@ -26,8 +35,9 @@ ImuBridge::ImuBridge(sf::IMU* sensor,
       angular_velocity_covariance_(diagonal_from_stddev(cfg.angular_velocity_std)),
       linear_acceleration_covariance_(diagonal_from_stddev(cfg.linear_acceleration_std)) {}
 
-#include <cmath> // Ensure this is included for M_PI and M_PI_2
-
+/**
+ * @brief Publishes one IMU sample after converting to ROS ENU/FLU conventions.
+ */
 void ImuBridge::on_step(const Context& ctx) {
     if (!sensor_->isNewDataAvailable()) {
         return;

@@ -1,3 +1,8 @@
+/**
+ * @file tauv_sim.cpp
+ * @brief Entry point for the tauv_sim executable and CLI argument parsing.
+ */
+
 #include <core/GraphicalSimulationApp.h>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
@@ -20,6 +25,9 @@ struct ParsedArgs {
     bool enable_cameras{true};
 };
 
+/**
+ * @brief Parses tauv_sim custom CLI flags and forwards remaining args to ROS.
+ */
 ParsedArgs parse_args(int argc, char** argv) {
     ParsedArgs result;
     for (int i = 1; i < argc; ++i) {
@@ -47,6 +55,7 @@ ParsedArgs parse_args(int argc, char** argv) {
 }  // namespace
 
 int main(int argc, char** argv) {
+    // Parse tauv_sim flags before initializing ROS to avoid unknown ROS arguments.
     ParsedArgs parsed;
     try {
         parsed = parse_args(argc, argv);

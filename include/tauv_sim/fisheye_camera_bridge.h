@@ -1,3 +1,8 @@
+/**
+ * @file fisheye_camera_bridge.h
+ * @brief Declares the bridge for publishing Stonefish fisheye camera frames.
+ */
+
 #pragma once
 
 #include <sensors/vision/FisheyeCamera.h>
@@ -11,8 +16,14 @@
 
 #include "tauv_sim/context.h"
 
+/**
+ * @brief Queues camera frames from Stonefish callbacks and publishes them on ROS.
+ */
 class FisheyeCameraBridge {
    public:
+    /**
+     * @brief Constructs a camera bridge for one Stonefish fisheye sensor.
+     */
     FisheyeCameraBridge(sf::FisheyeCamera* sensor,
                         rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr pub,
                         std::string frame_id);

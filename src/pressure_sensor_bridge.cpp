@@ -1,3 +1,8 @@
+/**
+ * @file pressure_sensor_bridge.cpp
+ * @brief Implements conversion of simulated pressure readings into depth messages.
+ */
+
 #include "tauv_sim/pressure_sensor_bridge.h"
 
 #include <sensors/scalar/Pressure.h>
@@ -8,6 +13,9 @@ PressureSensorBridge::PressureSensorBridge(
     std::string frame_id)
     : sensor_pressure_(sensor), frame_id_(std::move(frame_id)), pub_(pub) {}
 
+/**
+ * @brief Publishes depth as `nav_msgs::msg::Odometry` when a new sample is available.
+ */
 void PressureSensorBridge::on_step(const Context& ctx) {
     if (sensor_pressure_->isNewDataAvailable()) {
         const float pressure = sensor_pressure_->getLastValue(0);

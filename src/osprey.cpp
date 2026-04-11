@@ -1,3 +1,8 @@
+/**
+ * @file osprey.cpp
+ * @brief Implements dynamic Osprey model construction, sensors, and thruster wiring.
+ */
+
 #include "tauv_sim/osprey.h"
 
 #undef Max  // stonefish opengl Max conflicts with ROS
@@ -97,6 +102,9 @@ Osprey::Osprey(const std::string prefix,
 
 }
 
+/**
+ * @brief Runs all sensor and thruster bridge updates for the current step.
+ */
 void Osprey::on_step(const Context& ctx) {
     sensors_->on_step(ctx);
 

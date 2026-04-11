@@ -1,7 +1,15 @@
+/**
+ * @file util.cpp
+ * @brief Implements math conversion and inertia helper routines for tauv_sim.
+ */
+
 #include "tauv_sim/util.h"
 
 #include "Eigen/Eigenvalues"
 
+/**
+ * @brief Converts Stonefish matrix storage into Eigen matrix storage.
+ */
 Eigen::Matrix3d sf_to_eigen_matrix(const sf::Matrix3& m) {
     Eigen::Matrix3d e;
 
@@ -21,6 +29,9 @@ Eigen::Matrix3d sf_to_eigen_matrix(const sf::Matrix3& m) {
     return e;
 }
 
+/**
+ * @brief Converts Eigen matrix storage into Stonefish matrix storage.
+ */
 sf::Matrix3 eigen_to_sf_matrix(const Eigen::Matrix3d& m) {
     sf::Matrix3 r;
     r[0][0] = m(0, 0);
@@ -35,6 +46,9 @@ sf::Matrix3 eigen_to_sf_matrix(const Eigen::Matrix3d& m) {
     return r;
 }
 
+/**
+ * @brief Computes principal inertia axes and moments for Stonefish rigid-body setup.
+ */
 std::pair<sf::Transform, sf::Vector3> get_sf_inertia(const config::osprey::InertialBuoyancy& cfg,
                                                      const sf::Matrix3 body_R_cad) {
     auto hull_inertia_COM_B_sf = body_R_cad * cfg.hull_inertia_COM_C * body_R_cad.transpose();

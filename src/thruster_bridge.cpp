@@ -1,3 +1,8 @@
+/**
+ * @file thruster_bridge.cpp
+ * @brief Implements ROS command/telemetry bridging for simulated thrusters.
+ */
+
 #include "tauv_sim/thruster_bridge.h"
 
 constexpr double RADPS_TO_RPM = 60.0 / (2.0 * M_PI);
@@ -14,6 +19,9 @@ ThrusterBridge::ThrusterBridge(sf::Thruster* thruster,
     c_(cfg){}
 
 
+/**
+ * @brief Publishes simulated ESC telemetry at the configured period.
+ */
 void ThrusterBridge::on_step(const Context& ctx) {
     using namespace std::chrono_literals;
     if (ctx.sim_time_ - prev_pub_time_ >= period_ns_) {

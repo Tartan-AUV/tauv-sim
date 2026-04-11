@@ -1,3 +1,8 @@
+/**
+ * @file osprey_sensors.cpp
+ * @brief Implements sensor creation, attachment, and bridge stepping for Osprey.
+ */
+
 #include "tauv_sim/osprey_sensors.h"
 
 #include <core/FeatherstoneRobot.h>
@@ -149,6 +154,9 @@ OspreySensors::OspreySensors(std::string prefix,
     // tf_broadcaster->sendTransform(tfs);
 }
 
+/**
+ * @brief Attaches all enabled sensors directly to the dynamic robot model.
+ */
 void OspreySensors::attach_to_robot(sf::FeatherstoneRobot* robot) {
     if (!robot) {
         return;
@@ -170,6 +178,9 @@ void OspreySensors::attach_to_robot(sf::FeatherstoneRobot* robot) {
     }
 }
 
+/**
+ * @brief Attaches all enabled sensors to the animated body used in kinematic mode.
+ */
 void OspreySensors::attach_to_animated(sf::AnimatedEntity* entity,
                                        sf::SimulationManager* sim_manager) {
     if (!entity || !sim_manager) {
@@ -203,6 +214,9 @@ void OspreySensors::attach_to_animated(sf::AnimatedEntity* entity,
     }
 }
 
+/**
+ * @brief Polls each bridge and publishes available sensor data.
+ */
 void OspreySensors::on_step(const Context& ctx) {
     if (pressure_bridge_) {
         pressure_bridge_->on_step(ctx);
@@ -228,8 +242,14 @@ sf::Transform OspreySensors::body_T_depth() const {
     return sf::Transform{sf::I3(), frames_.t_depth_B};
 }
 
+/**
+ * @brief Computes body-to-DVL transform from configured CAD frames.
+ */
 sf::Transform OspreySensors::body_T_dvl() const { return body_T_cad_ * frames_.cad_T_dvl; }
 
+/**
+ * @brief Computes body-to-IMU transform for the requested IMU index.
+ */
 sf::Transform OspreySensors::body_T_imu(size_t idx) const {
     if (idx == 0) {
         return body_T_cad_ * frames_.cad_T_imu0;
@@ -237,6 +257,9 @@ sf::Transform OspreySensors::body_T_imu(size_t idx) const {
     return body_T_cad_ * frames_.cad_T_imu1;
 }
 
+/**
+ * @brief Computes body-to-camera transform for the requested camera index.
+ */
 sf::Transform OspreySensors::body_T_cam(size_t idx) const {
     if (idx == 0) {
         return body_T_cad_ * frames_.cad_T_cam0;
