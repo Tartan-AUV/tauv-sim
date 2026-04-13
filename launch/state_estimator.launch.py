@@ -18,7 +18,7 @@ def generate_launch_description():
     trajectory_file = sim_share_dir / "config" / "trajectories" / "osprey_square.yaml"
 
     common_share_dir = Path(get_package_share_directory("tauv_core"))
-    common_ekf_file = common_share_dir / "config" / "ekfFUNNY.yaml"
+    common_ekf_file = common_share_dir / "tauv_stateEstimation" / "config" / "ekfFUNNY.yaml"
 
     # Create a timestamped bag output path so each run has isolated recordings.
     timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M.%S')
@@ -108,7 +108,7 @@ def generate_launch_description():
                 output='screen'
             ),
             Node(
-                package='tauv_autonomy',
+                package='tauv_controller',
                 executable='controller',
                 name='controller',
                 parameters=[{
@@ -117,13 +117,13 @@ def generate_launch_description():
                 output='screen',
             ),
             Node(
-                package='tauv_autonomy',
+                package='tauv_controller',
                 executable='thruster_forces',
                 name='thruster_forces',
                 output='screen',
             ),
             Node(
-                package='tauv_autonomy',
+                package='tauv_controller',
                 executable='thruster_rpms',
                 name='thruster_rpms',
                 output='screen',
