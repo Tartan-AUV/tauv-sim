@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Osprey AUV rigid-body model.
+
+  GENERATED FILE - do not edit by hand.
+  Regenerate with:  python tools/generate_mjcf.py
+  Source of truth:  tauv_sim/config/params.yaml + tauv_sim/mujoco/config/osprey.yaml
+
+  World frame is NED (x north, y east, z DOWN), so gravity is +z.
+  Body frame is NED (x forward, y right, z down), origin at the CAD origin.
+
+  There is no fluid model here on purpose: density and viscosity are pinned to
+  zero and all hydrodynamic and thruster wrenches are injected externally
+  through data.xfrc_applied.
+-->
+<mujoco model="osprey">
+  <compiler angle="radian" autolimits="true" inertiafromgeom="false" balanceinertia="false"/>
+
+  <option timestep="0.002"
+          integrator="RK4"
+          gravity="0 0 9.80665"
+          density="0"
+          viscosity="0"
+          wind="0 0 0"/>
+
+  <!-- Offscreen framebuffer must be sized up front; it bounds the resolution of
+       both tools/view_model.py stills and the Step 4 camera sensors. -->
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+    <scale framelength="0.25" framewidth="0.012"/>
+    <headlight ambient="0.45 0.45 0.45" diffuse="0.7 0.7 0.7" specular="0.2 0.2 0.2"/>
+    <rgba haze="0.13 0.24 0.33 1"/>
+  </visual>
+
+  <asset>
+    <mesh name="hull_collision" file="hull_physical.stl"
+          content_type="model/stl"/>
+    <mesh name="hull_visual" file="hull_visual_binary.stl"
+          content_type="model/stl"/>
+    <texture name="pool_floor" type="2d" builtin="checker"
+             rgb1="0.10 0.18 0.24" rgb2="0.15 0.26 0.33" width="512" height="512"/>
+    <material name="pool_floor" texture="pool_floor" texrepeat="12 12"/>
+    <texture name="water" type="skybox" builtin="gradient"
+             rgb1="0.09 0.24 0.34" rgb2="0.02 0.06 0.11" width="256" height="256"/>
+    <material name="hull_red" rgba="0.75 0.12 0.12 1"/>
+    <material name="hull_collision_material" rgba="0.2 0.8 0.2 0.25"/>
+  </asset>
+
+  <default>
+    <!-- Visual geoms carry no mass and never collide; the explicit <inertial>
+         below is the sole source of the body's inertial properties. -->
+    <default class="visual">
+      <geom type="mesh" group="2" contype="0" conaffinity="0" mass="0"
+            material="hull_red"/>
+    </default>
+    <default class="collision">
+      <geom type="mesh" group="3" contype="1" conaffinity="1" mass="0"
+            material="hull_collision_material"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light name="key" pos="0 0 -4" dir="0 0 1" directional="true"/>
+
+    <!-- Cameras are given explicitly because the world is z-down; MuJoCo's
+         default free camera would otherwise start underneath the scene. -->
+    <!-- A MuJoCo camera looks along its own -z with +y up. In NED the world's
+         "up" is -z, so every camera here uses y_cam = (0,0,-1). -->
+    <camera name="chase" mode="trackcom" pos="-2 0 -0.3" xyaxes="0 1 0 0 0 -1"/>
+    <camera name="side" mode="trackcom" pos="0 -2.5 -0.4" xyaxes="-1 0 0 0 0 -1"/>
+    <camera name="above" mode="trackcom" pos="0 0 -2.5" xyaxes="0 1 0 1 0 0"/>
+
+    <!-- Static visual reference. The cameras track the vehicle, so without a
+         fixed object in the scene there is nothing to see it move against.
+         Rotated 180 deg about x so its visible face points up in NED, and
+         non-colliding because the pool is not modelled yet. -->
+    <geom name="reference_floor" type="plane" pos="0 0 3"
+          quat="0 1 0 0" size="12 12 0.1"
+          material="pool_floor" group="2" contype="0" conaffinity="0"/>
+
+    <body name="osprey" pos="0 0 0">
+      <freejoint name="osprey_free"/>
+
+      <!-- Mass, COM and full inertia tensor come straight from params.yaml,
+           rotated from CAD axes into body axes. -->
+      <inertial pos="0.035 0 0.05"
+                mass="22.3"
+                fullinertia="10 10 10 0 0 0"/>
+
+      <geom name="hull_visual" class="visual" mesh="hull_visual"
+            quat="0 0.707106781 0.707106781 0"/>
+      <geom name="hull_collision" class="collision" mesh="hull_collision"
+            quat="0 0.707106781 0.707106781 0"/>
+
+      <!-- Centre of buoyancy: where the restoring force is applied. -->
+      <site name="cob" pos="0.035 0 0.076"
+            type="sphere" size="0.02" rgba="0.1 0.4 1.0 0.7"/>
+      <!-- Centre of mass, for visual comparison against the COB. -->
+      <site name="com" pos="0.035 0 0.05"
+            type="sphere" size="0.02" rgba="1.0 0.6 0.1 0.7"/>
+
+      <!-- FRH: esc 0, left-handed. +x is the positive-command thrust direction. -->
+      <site name="thruster_frh" pos="0.227 0.225 -0.079" quat="0 0.382683432 0.923879533 0" type="cylinder" size="0.005 0.03" rgba="0.1 0.5 0.9 0.6"/>
+      <!-- FLH: esc 1, left-handed. +x is the positive-command thrust direction. -->
+      <site name="thruster_flh" pos="0.24 -0.212 -0.079" quat="0 -0.382683432 0.923879533 0" type="cylinder" size="0.005 0.03" rgba="0.1 0.5 0.9 0.6"/>
+      <!-- BRH: esc 2, right-handed. +x is the positive-command thrust direction. -->
+      <site name="thruster_brh" pos="-0.226 0.226 -0.079" quat="0 0.923879533 0.382683432 0" type="cylinder" size="0.005 0.03" rgba="0.1 0.5 0.9 0.6"/>
+      <!-- BLH: esc 3, right-handed. +x is the positive-command thrust direction. -->
+      <site name="thruster_blh" pos="-0.226 -0.226 -0.079" quat="0 0.923879533 -0.382683432 0" type="cylinder" size="0.005 0.03" rgba="0.1 0.5 0.9 0.6"/>
+      <!-- FRV: esc 4, left-handed. +x is the positive-command thrust direction. -->
+      <site name="thruster_frv" pos="0.094 0.246 0.021" quat="0.5 0.5 -0.5 0.5" type="cylinder" size="0.005 0.03" rgba="0.1 0.5 0.9 0.6"/>
+      <!-- FLV: esc 5, right-handed. +x is the positive-command thrust direction. -->
+      <site name="thruster_flv" pos="0.094 -0.246 0.021" quat="0.5 -0.5 -0.5 -0.5" type="cylinder" size="0.005 0.03" rgba="0.1 0.5 0.9 0.6"/>
+      <!-- BRV: esc 6, right-handed. +x is the positive-command thrust direction. -->
+      <site name="thruster_brv" pos="-0.094 0.246 0.021" quat="0.5 -0.5 -0.5 -0.5" type="cylinder" size="0.005 0.03" rgba="0.1 0.5 0.9 0.6"/>
+      <!-- BLV: esc 7, left-handed. +x is the positive-command thrust direction. -->
+      <site name="thruster_blv" pos="-0.094 -0.246 0.021" quat="0.5 0.5 -0.5 0.5" type="cylinder" size="0.005 0.03" rgba="0.1 0.5 0.9 0.6"/>
+    </body>
+  </worldbody>
+
+  <!--
+    No meshdir: the collision mesh lives in tauv_sim/assets/osprey/ while the
+    visual mesh is generated into mujoco/models/assets/. MJCF allows only one
+    meshdir, so load_model() supplies both through an in-memory asset dict.
+  -->
+</mujoco>

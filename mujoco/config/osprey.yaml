@@ -1,0 +1,45 @@
+# MuJoCo-specific simulator configuration for Osprey.
+#
+# The vehicle's PHYSICAL description (mass, displaced volume, inertia tensor,
+# COM/COB, thruster geometry) is deliberately NOT duplicated here. It is read
+# from the existing ROS parameter file `tauv_sim/config/params.yaml`, so the
+# Stonefish and MuJoCo simulators cannot silently disagree about the vehicle.
+#
+# This file holds only what MuJoCo needs and Stonefish had no equivalent for.
+
+# --- World -------------------------------------------------------------------
+# The MuJoCo world frame is NED (x north, y east, z DOWN), matching the repo-wide
+# convention. Gravity therefore points along +z.
+world:
+  gravity: 9.80665  # m/s^2, magnitude. Applied as +z in the NED world frame.
+
+  # Static visual reference plane. Without something fixed in the scene the
+  # vehicle floats against a featureless skybox while the tracking cameras
+  # follow it, which makes even a 9.8 m/s^2 free-fall look motionless.
+  # Visual only - it has no collision until the pool is modelled properly.
+  reference_floor_depth: 3.0  # m below the origin (NED +z is down)
+  reference_floor_size: 12.0  # m half-extent
+
+# --- Solver ------------------------------------------------------------------
+# The vehicle is a single free-floating rigid body with no joints and no
+# contacts, so the constraint solver is idle and the integrator is the only
+# thing that matters. RK4 is used because hydrodynamic damping is injected
+# through xfrc_applied, which the semi-implicit integrators cannot see when
+# forming their implicit damping term.
+solver:
+  timestep: 0.002   # s (500 Hz)
+  integrator: RK4
+
+# --- Meshes ------------------------------------------------------------------
+# Meshes live in the sibling `tauv_sim/assets/osprey/` directory and are
+# referenced by the generated MJCF.
+#
+# `hull_physical.stl` is binary STL and is referenced in place.
+# `hull_visual.stl` is 65 MB *ASCII* STL, which MuJoCo's loader cannot read, so
+# it is converted (and optionally decimated) into `models/assets/` by
+# `tools/prepare_assets.py`.
+meshes:
+  collision: hull_physical.stl        # referenced directly from ../assets/osprey/
+  visual: hull_visual_binary.stl      # generated into models/assets/
+  visual_source: hull_visual.stl
+  visual_max_faces: 60000             # 0 disables decimation

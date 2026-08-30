@@ -40,9 +40,21 @@
 
             inertial_buoyancy:
                 mass: 22.3
+                # TODO(mujoco-migration): net buoyancy is +2.7 kgf (26.5 N) in fresh
+                # water against a 22.3 kg mass. That is ~5x the usual AUV ballast
+                # margin. Confirm the displaced volume, or confirm Osprey really is
+                # this positively buoyant.
                 volume: 0.025
                 t_hull_com_C: [0.0, 0.035, -0.05]
+                # TODO(mujoco-migration): CAD z is up, so this places the centre of
+                # buoyancy 26 mm BELOW the centre of mass, which is passively
+                # unstable in roll and pitch. Osprey has flotation mounted high,
+                # which implies COB should be ABOVE COM. Verify the sign.
                 t_hull_cob_C: [0.0, 0.035, -0.076]
+                # TODO(mujoco-migration): almost certainly a placeholder. A uniform
+                # -density solid of hull_physical.stl at 22.3 kg gives roughly
+                # diag(0.51, 0.51, 0.67) kg m^2, so these values are ~20x too large
+                # and isotropic. Replace with the real CAD inertia tensor.
                 hull_inertia_COM_C: [10.0, 0.0, 0.0,
                                     0.0, 10.0, 0.0,
                                     0.0, 0.0, 10.0]
@@ -101,6 +113,10 @@
                     esc_thruster_ids: [0, 1, 2, 3, 4, 5, 6, 7]
 
                     # This is in RFU coords ???
+                    # TODO(mujoco-migration): the vertical thrusters (4-7) sit at
+                    # +/-0.246 lateral but only +/-0.094 fore-aft, giving strong roll
+                    # authority and weak pitch authority on a nearly square hull.
+                    # Verify against CAD that these two coordinates are not swapped.
                     t_cad__thruster_0: [0.225, 0.227, 0.079] # FRH
                     rpy_cad__thruster_0: [0.0, 0.0, 135.0]
 
