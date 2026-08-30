@@ -57,20 +57,28 @@ std::pair<sf::Transform, sf::Vector3> get_sf_inertia(const config::osprey::Inert
     // Symmetrize
     I_B = 0.5 * (I_B + I_B.transpose());
 
-    // Get eigenvectors
-    auto es = Eigen::EigenSolver<Eigen::Matrix3d>{I_B};
-    auto eigenvectors = es.eigenvectors().real();
-    auto eigenvalues = es.eigenvalues().real();
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> es(I_B);
+    auto eigenvectors = es.eigenvectors();
+    auto eigenvalues = es.eigenvalues();
 
-    // Ensure determinant is +1
+    // Ensure determinant is +1 (valid rotation)
     if (eigenvectors.determinant() < 0.0) {
         eigenvectors.col(2) *= -1.0;
     }
 
-    //
     auto I_CG = sf::Vector3{eigenvalues(0), eigenvalues(1), eigenvalues(2)};
 
-    auto body_R_CG = eigen_to_sf_matrix(eigenvectors);
+    // Eigen matrices are accessed (row, col)
+    sf::Matrix3 body_R_CG(
+        eigenvectors(0,0), eigenvectors(0,1), eigenvectors(0,2),
+        eigenvectors(1,0), eigenvectors(1,1), eigenvectors(1,2),
+        eigenvectors(2,0), eigenvectors(2,1), eigenvectors(2,2)
+    );
+
+    // Safety net: Fallback to Identity if the matrix is still somehow corrupt
+    if (body_R_CG[0].x() == 0 && body_R_CG[1].y() == 0 && body_R_CG[2].z() == 0) {
+        body_R_CG.setIdentity();
+    }
 
     auto body_T_CG = sf::Transform{body_R_CG, body_R_cad * cfg.t_hull_com_C};
 
