@@ -54,7 +54,7 @@ OspreySensors::OspreySensors(std::string prefix,
     const auto dvl_params = config_loader_->get_dvl_params();
     dvl_sensor_ = std::make_unique<sf::DVL>("dvl",
                                             50,
-                                            false,
+                                            true,
                                             dvl_params.update_rate);
 
     dvl_sensor_->setRange(dvl_params.linear_velocity_range, 0.01, 10);

@@ -4,7 +4,7 @@
 /tauv_sim:
     ros__parameters:
         world_T_body_initial:
-            t_world__body_initial: [2.0, 2.0, -1.0]
+            t_world__body_initial: [0.0, 0.0, -1.0]
             world_R_body_initial: [0.0, 1.0, 0.0,
                                    1.0, 0.0, 0.0,
                                    0.0, 0.0, -1.0]
