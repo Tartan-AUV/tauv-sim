@@ -21,7 +21,9 @@ and actuators to ROS topics used by the rest of the autonomy stack.
 
 ### `src/tauv_sim.cpp`
 - Executable entry point.
-- Parses package-specific CLI flags (`--kinematic`, `--no-cameras` / `--headless`).
+- Parses package-specific CLI flags (`--kinematic`, `--no-cameras` / `--headless`, `--caustics[=true|false]`).
+- Caustics (animated sunlight focusing on underwater surfaces) are off by default; enable with `--caustics`,
+  or `ros2 launch tauv_sim main.launch.py caustics:=true`. They also appear in simulated camera images.
 - Creates `TauvSimulationManager` and starts the Stonefish app loop.
 
 ### `include/tauv_sim/config.h`, `config_loader.h`, `src/config_loader.cpp`

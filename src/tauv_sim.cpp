@@ -23,6 +23,7 @@ struct ParsedArgs {
     std::vector<std::string> ros_args;
     std::optional<std::string> kinematic_trajectory_path;
     bool enable_cameras{true};
+    bool enable_caustics{false};
 };
 
 /**
@@ -43,6 +44,22 @@ ParsedArgs parse_args(int argc, char** argv) {
 
         if (arg == "--no-cameras" || arg == "--headless") {
             result.enable_cameras = false;
+            continue;
+        }
+
+        if (arg == "--caustics") {
+            result.enable_caustics = true;
+            continue;
+        }
+        if (arg.rfind("--caustics=", 0) == 0) {
+            const std::string value = arg.substr(std::string("--caustics=").size());
+            if (value == "true" || value == "True" || value == "1") {
+                result.enable_caustics = true;
+            } else if (value == "false" || value == "False" || value == "0") {
+                result.enable_caustics = false;
+            } else {
+                throw std::runtime_error("--caustics expects true or false, got '" + value + "'");
+            }
             continue;
         }
 
@@ -78,6 +95,7 @@ int main(int argc, char** argv) {
     const std::string assets_path = (std::filesystem::path(share_path) / "assets").string();
 
     sf::RenderSettings s;
+    s.caustics = parsed.enable_caustics;
     sf::HelperSettings h;
     h.showActuators = true;
     h.showSensors = true;

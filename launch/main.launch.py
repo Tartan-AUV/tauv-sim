@@ -44,6 +44,10 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 'tune', default_value='false', description='Enable autotuning'
             ),
+            DeclareLaunchArgument(
+                'caustics', default_value='false',
+                description='Render animated sunlight caustics underwater (GUI and sim cameras)'
+            ),
 
             # tauv_sim is assumed to be the /clock source itself, so it's left off use_sim_time
             # below — if it isn't publishing /clock, this needs use_sim_time: True too.
@@ -52,6 +56,7 @@ def generate_launch_description():
                 executable="tauv_sim",
                 name="tauv_sim",
                 parameters=[str(sim_param_file)],
+                arguments=[["--caustics=", LaunchConfiguration('caustics')]],
                 # arguments=["--kinematic", str(trajectory_file)],
                 output="screen",
             ),
