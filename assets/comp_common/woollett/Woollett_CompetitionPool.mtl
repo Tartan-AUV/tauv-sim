@@ -1,0 +1,52 @@
+newmtl pool_stone
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/pool_stone.png
+map_Bump textures/pool_stone_normal.png
+norm textures/pool_stone_normal.png
+
+newmtl tile_band_5in
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/tile_band_5in.png
+map_Bump textures/tile_band_5in_normal.png
+norm textures/tile_band_5in_normal.png
+
+newmtl deck_concrete
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.720 0.700 0.660
+
+newmtl tile_dark_1in
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/tile_dark_1in.png
+map_Bump textures/tile_dark_1in_normal.png
+norm textures/tile_dark_1in_normal.png
+
+newmtl tile_medium_1in
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/tile_medium_1in.png
+map_Bump textures/tile_medium_1in_normal.png
+norm textures/tile_medium_1in_normal.png
+

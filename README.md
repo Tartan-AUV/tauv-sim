@@ -22,6 +22,16 @@ and actuators to ROS topics used by the rest of the autonomy stack.
 ### `src/tauv_sim.cpp`
 - Executable entry point.
 - Parses package-specific CLI flags (`--kinematic`, `--no-cameras` / `--headless`, `--caustics[=true|false]`).
+- World selection:
+  - `--pool=basic|comp` (default `basic`): the Irvine pool or the Woollett competition pool.
+  - `--scenario=none|comp2026|comp2026A|comp2026B|comp2026C|comp2026D` (default `none`). Every
+    `comp2026*` scenario places the same course props (`comp::Comp2026Props()`, currently the lane
+    dividers) and requires `--pool=comp`. `comp2026A`-`D` also start the robot in section A-D (sections
+    run along +X), at the section centre with its back ~5 cm from the front long wall and its camera
+    side facing into the pool
+    (`comp::Comp2026StartPose`). Depth and roll/pitch come from `world_T_body_initial`. Ignored in
+    kinematic mode.
+  - Launch: `ros2 launch tauv_sim main.launch.py pool:=comp scenario:=comp2026A`.
 - Caustics (animated sunlight focusing on underwater surfaces) are off by default; enable with `--caustics`,
   or `ros2 launch tauv_sim main.launch.py caustics:=true`. They also appear in simulated camera images.
 - Creates `TauvSimulationManager` and starts the Stonefish app loop.
@@ -63,7 +73,30 @@ and actuators to ROS topics used by the rest of the autonomy stack.
 ### Trajectory and utility modules
 - `trajectory_loader.*`: parses YAML keyframe trajectories used in kinematic mode.
 - `util.*`: matrix and inertia conversion helpers between Stonefish and Eigen.
-- `registry.h`: shared material/look/link registries used when building the scenario.
+- `registry.h`: shared material/look/link registries used when building the scenario. Looks may
+  reference albedo/normal-map textures (paths relative to `assets/`).
+
+### World setup: `scenario.h`, `spawn.h`, `static_prop.*`, `comp.*`
+- `scenario.h`: the `PoolModel` / `Scenario` options and their CLI parsing. `BuildScenario` switches
+  on each one, so a new pool or scenario is a new enum value plus a new `case`.
+- `spawn.h`: `AlignStartPose` moves a default robot pose to a start frame (origin = position,
+  +X = heading), keeping depth and roll/pitch. Osprey's front axis is `Osprey::kFrontInBody`.
+- `comp.*` (namespace `comp`): RoboSub setup entry points called by `BuildScenario`:
+  `create_looks`, `setup_woollett_pool` (pool + no suspended particles) and `setup_2026_scenario`
+  (course props + optional start frame).
+
+### Static props: `static_prop.*` and competition data: `comp.h`
+- Stonefish gives each mesh one look and ignores `.mtl` files, so multi-material models are used as
+  their per-material exports (`<model dir>/by_material/<model>_<material>.obj`).
+- `props::AddStaticProp` adds a prop's visual parts plus one collision description, chosen per prop:
+  `VisualMesh` (exact triangle mesh, e.g. the pool), `Mesh` (proxy mesh / convex hull),
+  `Box`, `Cylinder`, `Sphere`, `Capsule` (invisible primitives), or `None`.
+- Visual-only parts are excluded from contacts and sensor raycasts (DVL) via Bullet collision group 0.
+- `static_prop.*` (namespace `props`) is generic and can build any prop.
+- `comp.h` (namespace `comp`) holds the RoboSub-specific data: competition looks, `WoollettPool()`,
+  `LaneRope(...)` (capsule collider), `WoollettQuarterDividers()` (three 75 ft ropes parallel to
+  the short edge at x = -12.5, 0, +12.5 m, splitting the pool into four 12.5 m sections),
+  `Comp2026Props()` (every comp2026 prop) and `Comp2026StartPose(section)`.
 
 ### `config/`
 - `params.yaml`: runtime parameters for frames, dynamics, sensors, and actuators.
@@ -77,6 +110,8 @@ and actuators to ROS topics used by the rest of the autonomy stack.
 
 ### `assets/`
 - Pool and Osprey meshes/textures referenced by scenario construction.
+- `comp_common/`, `comp_2026/`: RoboSub competition props (meters, +Z up, origin on the water
+  surface). Multi-material models also have a `by_material/` folder with one OBJ per material.
 
 ## Runtime Modes
 

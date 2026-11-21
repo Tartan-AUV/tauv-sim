@@ -15,6 +15,7 @@
 
 #undef Max
 
+#include "tauv_sim/scenario.h"
 #include "tauv_sim/tauv_simulation_manager.h"
 
 namespace {
@@ -24,7 +25,27 @@ struct ParsedArgs {
     std::optional<std::string> kinematic_trajectory_path;
     bool enable_cameras{true};
     bool enable_caustics{false};
+    PoolModel pool{PoolModel::Basic};
+    Scenario scenario{Scenario::None};
 };
+
+/**
+ * @brief Matches `--name=value` or `--name value`; returns the value, advancing `i` for the latter.
+ */
+std::optional<std::string> option_value(const std::string& name, int argc, char** argv, int& i) {
+    const std::string arg(argv[i]);
+    const std::string flag = "--" + name;
+    if (arg.rfind(flag + "=", 0) == 0) {
+        return arg.substr(flag.size() + 1);
+    }
+    if (arg == flag) {
+        if (i + 1 >= argc) {
+            throw std::runtime_error(flag + " requires a value");
+        }
+        return std::string(argv[++i]);
+    }
+    return std::nullopt;
+}
 
 /**
  * @brief Parses tauv_sim custom CLI flags and forwards remaining args to ROS.
@@ -63,9 +84,31 @@ ParsedArgs parse_args(int argc, char** argv) {
             continue;
         }
 
+        if (const auto value = option_value("pool", argc, argv, i)) {
+            const auto pool = scenario::ParsePoolModel(*value);
+            if (!pool) {
+                throw std::runtime_error("--pool expects basic or comp, got '" + *value + "'");
+            }
+            result.pool = *pool;
+            continue;
+        }
+        if (const auto value = option_value("scenario", argc, argv, i)) {
+            const auto parsed_scenario = scenario::ParseScenario(*value);
+            if (!parsed_scenario) {
+                throw std::runtime_error(
+                    "--scenario expects none, comp2026, comp2026A, comp2026B, comp2026C or "
+                    "comp2026D, got '" + *value + "'");
+            }
+            result.scenario = *parsed_scenario;
+            continue;
+        }
+
         result.ros_args.emplace_back(arg);
     }
 
+    if (!scenario::IsCompatible(result.pool, result.scenario)) {
+        throw std::runtime_error("comp2026 scenarios are laid out for the competition pool; use --pool=comp");
+    }
     return result;
 }
 
@@ -102,7 +145,9 @@ int main(int argc, char** argv) {
     TauvSimulationManager manager(assets_path,
                                   100.0f,
                                   parsed.kinematic_trajectory_path,
-                                  parsed.enable_cameras);
+                                  parsed.enable_cameras,
+                                  parsed.pool,
+                                  parsed.scenario);
 
     sf::GraphicalSimulationApp app("TAUV Simulator", assets_path, s, h, &manager);
     app.Run();

@@ -6,6 +6,10 @@
 #pragma once
 
 #include <StonefishCommon.h>
+#include <core/SimulationManager.h>
+
+#include <array>
+#include <string>
 
 struct Material {
     std::string name;
@@ -19,7 +23,27 @@ struct Look {
     float roughness;
     float metalness;
     float reflectivity;
+    // Optional texture paths, relative to the assets directory ("" = untextured).
+    std::string albedo_texture = "";
+    std::string normal_texture = "";  // tangent-space normal map (OpenGL convention)
 };
+
+/**
+ * @brief Creates a look in Stonefish, resolving its texture paths against the assets directory.
+ * @param assets_path assets directory, with a trailing slash
+ */
+inline void create_look(sf::SimulationManager& sim, const Look& look, const std::string& assets_path) {
+    const auto full_path = [&](const std::string& rel) {
+        return rel.empty() ? rel : assets_path + rel;
+    };
+    sim.CreateLook(look.name,
+                   look.color,
+                   look.roughness,
+                   look.metalness,
+                   look.reflectivity,
+                   full_path(look.albedo_texture),
+                   full_path(look.normal_texture));
+}
 
 namespace materials {
 

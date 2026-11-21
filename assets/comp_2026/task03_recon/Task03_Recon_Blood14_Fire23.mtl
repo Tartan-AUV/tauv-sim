@@ -1,0 +1,76 @@
+newmtl pvc_fitting
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.800 0.800 0.800
+
+newmtl pvc_white
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.920 0.920 0.900
+
+newmtl green
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.100 0.800 0.100
+
+newmtl crate_blue
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.130 0.300 0.420
+
+newmtl crate_white
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.950 0.950 0.970
+
+newmtl bin1_image
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/Task3_Blood.png
+
+newmtl bin2_image
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/Task3_Fire.png
+
+newmtl bin3_image
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/Task3_Fire.png
+
+newmtl bin4_image
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/Task3_Blood.png
+

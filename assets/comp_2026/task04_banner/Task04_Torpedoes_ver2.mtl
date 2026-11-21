@@ -1,0 +1,33 @@
+newmtl pvc_fitting
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.800 0.800 0.800
+
+newmtl pvc_white
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.920 0.920 0.900
+
+newmtl board_front
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd textures/Task4_ver2.png
+
+newmtl board_back
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.600 0.600 0.600
+

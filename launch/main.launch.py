@@ -48,6 +48,15 @@ def generate_launch_description():
                 'caustics', default_value='false',
                 description='Render animated sunlight caustics underwater (GUI and sim cameras)'
             ),
+            DeclareLaunchArgument(
+                'pool', default_value='basic',
+                description='Pool model: basic (Simplified model "Irvine") or comp (Woollett competition pool)'
+            ),
+            DeclareLaunchArgument(
+                'scenario', default_value='none',
+                description='none, comp2026 (course props), or comp2026A-D (props + robot start '
+                            'in section A-D); comp scenarios need pool:=comp'
+            ),
 
             # tauv_sim is assumed to be the /clock source itself, so it's left off use_sim_time
             # below — if it isn't publishing /clock, this needs use_sim_time: True too.
@@ -56,7 +65,11 @@ def generate_launch_description():
                 executable="tauv_sim",
                 name="tauv_sim",
                 parameters=[str(sim_param_file)],
-                arguments=[["--caustics=", LaunchConfiguration('caustics')]],
+                arguments=[
+                    ["--caustics=", LaunchConfiguration('caustics')],
+                    ["--pool=", LaunchConfiguration('pool')],
+                    ["--scenario=", LaunchConfiguration('scenario')],
+                ],
                 # arguments=["--kinematic", str(trajectory_file)],
                 output="screen",
             ),

@@ -1,0 +1,72 @@
+newmtl lead
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.860 0.070 0.090
+
+newmtl sec0
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.950 0.950 0.950
+
+newmtl sec1
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.050 0.220 0.720
+
+newmtl sec2
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.860 0.070 0.090
+
+newmtl sec3
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.950 0.950 0.950
+
+newmtl sec4
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.050 0.220 0.720
+
+newmtl sec5
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.860 0.070 0.090
+
+newmtl steel
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.620 0.630 0.650
+
+newmtl tensioner_body
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 0.900 0.900 0.880
+

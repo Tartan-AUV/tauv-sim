@@ -64,6 +64,8 @@ add_executable(tauv_sim
         src/kinematic_osprey.cpp
         src/fisheye_camera_bridge.cpp
         src/osprey_thrusters.cpp
+        src/static_prop.cpp
+        src/comp.cpp
 )
 target_include_directories(tauv_sim PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

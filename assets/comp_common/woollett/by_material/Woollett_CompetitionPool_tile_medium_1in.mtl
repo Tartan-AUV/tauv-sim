@@ -1,0 +1,11 @@
+newmtl tile_medium_1in
+Ka 0 0 0
+Ks 0.05 0.05 0.05
+Ns 10
+d 1
+illum 2
+Kd 1 1 1
+map_Kd ../textures/tile_medium_1in.png
+map_Bump ../textures/tile_medium_1in_normal.png
+norm ../textures/tile_medium_1in_normal.png
+

@@ -1,0 +1,1 @@
+Note: Very much an approximation! Made based on aerial images of the Woollett comp pool and video from comp. Do not take measurements of tile sizes and line spacing as reflective of ground reality.

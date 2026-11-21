@@ -31,6 +31,15 @@
 class Osprey {
    public:
     /**
+     * @brief Osprey's front (its camera side) in the body frame, as observed in the sim: body +Y
+     *        (CAD +X).
+     *
+     * Note this is 90 deg from the camera poses in params.yaml, which point the cameras along
+     * body +X.
+     */
+    static inline const sf::Vector3 kFrontInBody{0, 1, 0};
+
+    /**
      * @brief Builds the Stonefish Osprey model and wires ROS actuator/sensor bridges.
      */
     Osprey(const std::string prefix,
